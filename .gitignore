@@ -1,0 +1,47 @@
+# Flutter/Dart
+
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+
+# Android
+android/.gradle/
+*.apk
+*.aar
+
+# iOS
+Pods/
+DerivedData/
+
+# VS Code
+.vscode/
+*.iml
+
+# macOS
+.DS_Store
+
+
+
+
+
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.buildlog/
+.history
+
+
+
+# Flutter/Dart/Pub related
+**/doc/api/
+.pub/
+
+app.*.symbols
+
+
+build/
