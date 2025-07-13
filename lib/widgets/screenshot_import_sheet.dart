@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../data/accounts_data.dart';
@@ -119,7 +120,7 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
                             color: Colors.grey[200],
                             child: const Center(
                               child: Icon(
-                                Icons.image_not_supported,
+                                LucideIcons.imageOff,
                                 color: Colors.grey,
                                 size: 48,
                               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../data/accounts_data.dart';
 
 class AccountsPage extends StatefulWidget {
@@ -105,7 +106,7 @@ class _AccountsPageState extends State<AccountsPage>
                           borderRadius: BorderRadius.circular(25),
                         ),
                         child: const Icon(
-                          Icons.account_balance,
+                          LucideIcons.building2,
                           color: Colors.blue,
                           size: 24,
                         ),
@@ -138,7 +139,7 @@ class _AccountsPageState extends State<AccountsPage>
                         onPressed: () {
                           // TODO: Implement edit functionality
                         },
-                        icon: const Icon(Icons.edit, color: Colors.grey),
+                        icon: const Icon(LucideIcons.edit, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -151,7 +152,7 @@ class _AccountsPageState extends State<AccountsPage>
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddAccountDialog(context),
         backgroundColor: Colors.blue,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(LucideIcons.plus, color: Colors.white),
       ),
     );
   }

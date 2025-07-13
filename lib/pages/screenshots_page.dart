@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ScreenshotsPage extends StatefulWidget {
   const ScreenshotsPage({super.key});
@@ -73,7 +74,7 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
                 ),
                 child: const Center(
                   child: Icon(
-                    Icons.image,
+                    LucideIcons.image,
                     size: 48,
                     color: Colors.grey,
                   ),
@@ -112,7 +113,7 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.screenshot,
+            LucideIcons.monitor,
             size: 64,
             color: Colors.grey[400],
           ),
@@ -172,7 +173,7 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
         onPressed: _importScreenshot,
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
+        icon: const Icon(LucideIcons.plus),
         label: const Text('Import'),
       ),
     );

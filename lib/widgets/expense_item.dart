@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ExpenseItem extends StatelessWidget {
   final double amount;
@@ -104,19 +105,19 @@ class ExpenseItem extends StatelessWidget {
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
       case 'food':
-        return Icons.restaurant;
+        return LucideIcons.utensils;
       case 'transport':
-        return Icons.directions_car;
+        return LucideIcons.car;
       case 'shopping':
-        return Icons.shopping_bag;
+        return LucideIcons.shoppingBag;
       case 'entertainment':
-        return Icons.movie;
+        return LucideIcons.tv;
       case 'health':
-        return Icons.medical_services;
+        return LucideIcons.heart;
       case 'income':
-        return Icons.trending_up;
+        return LucideIcons.trendingUp;
       default:
-        return Icons.category;
+        return LucideIcons.tag;
     }
   }
 } 

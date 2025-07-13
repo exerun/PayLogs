@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'pages/root_scaffold.dart';
 import 'data/accounts_data.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/budget_provider.dart';
-import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'widgets/screenshot_import_sheet.dart';
+import 'widgets/responsive_layout.dart';
 
 void main() {
   runApp(const PayLogsApp());
@@ -29,15 +31,18 @@ class PayLogsApp extends StatelessWidget {
         theme: ThemeData(
           colorSchemeSeed: Colors.indigo,
           useMaterial3: true,
+          textTheme: GoogleFonts.jetBrainsMonoTextTheme(),
         ),
-        home: const _ShareIntentHandler(),
+        home: const ResponsiveLayout(
+          child: _ShareIntentHandler(),
+        ),
       ),
     );
   }
 }
 
 class _ShareIntentHandler extends StatefulWidget {
-  const _ShareIntentHandler({Key? key}) : super(key: key);
+  const _ShareIntentHandler({super.key});
 
   @override
   State<_ShareIntentHandler> createState() => _ShareIntentHandlerState();

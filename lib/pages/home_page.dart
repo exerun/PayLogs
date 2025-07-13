@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'add_page.dart';
 import '../widgets/expense_item.dart';
 import '../providers/transaction_provider.dart';
 import '../models/transaction.dart';
@@ -72,7 +74,7 @@ class _HomePageState extends State<HomePage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.receipt_long,
+                    LucideIcons.receipt,
                     size: 64,
                     color: Colors.grey,
                   ),
@@ -113,6 +115,32 @@ class _HomePageState extends State<HomePage>
           );
         },
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 18.0), // margin above nav bar
+        child: FloatingActionButton.extended(
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddPage()),
+            );
+          },
+          backgroundColor: Colors.orange,
+          icon: const Icon(LucideIcons.plus, color: Colors.white),
+          label: const Text(
+            'Add',
+            style: TextStyle(
+              fontFamily: 'JetBrainsMono',
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32), // pill shape
+          ),
+          elevation: 4,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 } 

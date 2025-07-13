@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class CustomKeypad extends StatelessWidget {
   final Function(String digit) onDigitPressed;
@@ -12,113 +13,104 @@ class CustomKeypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // First row: 1, 2, 3
-        Row(
-          children: [
-            Expanded(child: _buildKey('1')),
-            const SizedBox(width: 8),
-            Expanded(child: _buildKey('2')),
-            const SizedBox(width: 8),
-            Expanded(child: _buildKey('3')),
-          ],
-        ),
-        const SizedBox(height: 8),
-        
-        // Second row: 4, 5, 6
-        Row(
-          children: [
-            Expanded(child: _buildKey('4')),
-            const SizedBox(width: 8),
-            Expanded(child: _buildKey('5')),
-            const SizedBox(width: 8),
-            Expanded(child: _buildKey('6')),
-          ],
-        ),
-        const SizedBox(height: 8),
-        
-        // Third row: 7, 8, 9
-        Row(
-          children: [
-            Expanded(child: _buildKey('7')),
-            const SizedBox(width: 8),
-            Expanded(child: _buildKey('8')),
-            const SizedBox(width: 8),
-            Expanded(child: _buildKey('9')),
-          ],
-        ),
-        const SizedBox(height: 8),
-        
-        // Fourth row: 0, backspace
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: _buildKey('0'),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildBackspaceKey(),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildKey(String digit) {
-    return SizedBox(
-      height: 55,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => onDigitPressed(digit),
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF8E1), // Pale yellow
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: Center(
-              child: Text(
-                digit,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-          ),
-        ),
+    return Card(
+      color: const Color(0xFFF9F9F9),
+      elevation: 6,
+      margin: const EdgeInsets.all(0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final buttonSpacing = 14.0;
+            final buttonHeight = (constraints.maxHeight - buttonSpacing * 3) / 4;
+            final buttonWidth = (constraints.maxWidth - buttonSpacing * 2) / 3;
 
-  Widget _buildBackspaceKey() {
-    return SizedBox(
-      height: 55,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onBackspace,
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF8E1), // Pale yellow
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.backspace,
-                size: 24,
-                color: Colors.black87,
-              ),
-            ),
-          ),
+            Widget buildKey(String digit) {
+              return SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  child: InkWell(
+                    onTap: () => onDigitPressed(digit),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Center(
+                      child: Text(
+                        digit,
+                        style: TextStyle(
+                          fontFamily: 'JetBrainsMono',
+                          fontSize: 28,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            Widget buildBackspaceKey() {
+              return SizedBox(
+                width: buttonWidth,
+                height: buttonHeight,
+                child: Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  child: InkWell(
+                    onTap: onBackspace,
+                    borderRadius: BorderRadius.circular(16),
+                    child: const Center(
+                      child: Icon(
+                        LucideIcons.delete,
+                        size: 28,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [buildKey('1'), buildKey('2'), buildKey('3')],
+                ),
+                SizedBox(height: buttonSpacing),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [buildKey('4'), buildKey('5'), buildKey('6')],
+                ),
+                SizedBox(height: buttonSpacing),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [buildKey('7'), buildKey('8'), buildKey('9')],
+                ),
+                SizedBox(height: buttonSpacing),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: buildKey('0'),
+                    ),
+                    SizedBox(width: buttonSpacing),
+                    Expanded(
+                      flex: 1,
+                      child: buildBackspaceKey(),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

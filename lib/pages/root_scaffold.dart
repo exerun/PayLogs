@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'home_page.dart';
 import 'manage_page.dart';
-import 'add_page.dart';
 import 'accounts_page.dart';
 import 'screenshots_page.dart';
+
+class GroupsPage extends StatelessWidget {
+  const GroupsPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Text(
+          'Under Construction',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey),
+        ),
+      ),
+    );
+  }
+}
 
 class RootScaffold extends StatefulWidget {
   const RootScaffold({super.key});
@@ -18,29 +34,71 @@ class _RootScaffoldState extends State<RootScaffold> {
   final _pages = const [
     HomePage(),
     ManagePage(),
-    AddPage(),
+    GroupsPage(),
     AccountsPage(),
     ScreenshotsPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (i) => setState(() => _currentIndex = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.tune), label: 'Manage'),
-          NavigationDestination(icon: Icon(Icons.add), label: 'Add'),
-          NavigationDestination(icon: Icon(Icons.account_balance_wallet), label: 'Accounts'),
-          NavigationDestination(icon: Icon(Icons.image), label: 'Screenshots'),
-        ],
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceVariant,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  for (int i = 0; i < 5; i++)
+                    GestureDetector(
+                      onTap: () => setState(() => _currentIndex = i),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: _currentIndex == i
+                            ? BoxDecoration(
+                                color: Colors.amber[300] ?? theme.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(50),
+                              )
+                            : null,
+                        child: Icon(
+                          [
+                            LucideIcons.home,
+                            LucideIcons.settings,
+                            LucideIcons.users,
+                            LucideIcons.wallet,
+                            LucideIcons.image,
+                          ][i],
+                          color: _currentIndex == i ? Colors.amber[800] : Colors.grey[700],
+                          size: 26,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

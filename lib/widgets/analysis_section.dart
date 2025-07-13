@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/transaction_provider.dart';
 import '../models/transaction.dart';
 
@@ -69,7 +70,7 @@ class AnalysisSection extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.pie_chart,
+                  LucideIcons.pieChart,
                   size: 64,
                   color: Colors.grey,
                 ),

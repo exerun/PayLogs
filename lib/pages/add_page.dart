@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../data/accounts_data.dart';
 import '../providers/transaction_provider.dart';
 import '../models/transaction.dart';
 import '../widgets/custom_keypad.dart';
+import '../widgets/selection_modal.dart';
+
+const double gap = 14.0;
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -27,12 +31,17 @@ class _AddPageState extends State<AddPage>
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
 
-  final List<String> _categories = [
-    "Food",
-    "Transport",
-    "Electronics",
-    "Rent",
-    "Others"
+  // Category options with Lucide icons
+  final List<SelectionOption> _categoryOptions = [
+    const SelectionOption(value: 'Food', label: 'Food', icon: LucideIcons.utensils),
+    const SelectionOption(value: 'Transport', label: 'Transport', icon: LucideIcons.car),
+    const SelectionOption(value: 'Electronics', label: 'Electronics', icon: LucideIcons.smartphone),
+    const SelectionOption(value: 'Rent', label: 'Rent', icon: LucideIcons.home),
+    const SelectionOption(value: 'Shopping', label: 'Shopping', icon: LucideIcons.shoppingBag),
+    const SelectionOption(value: 'Entertainment', label: 'Entertainment', icon: LucideIcons.tv),
+    const SelectionOption(value: 'Health', label: 'Health', icon: LucideIcons.heart),
+    const SelectionOption(value: 'Education', label: 'Education', icon: LucideIcons.bookOpen),
+    const SelectionOption(value: 'Others', label: 'Others', icon: LucideIcons.moreHorizontal),
   ];
 
   void _onDigitPressed(String digit) {
@@ -53,6 +62,105 @@ class _AddPageState extends State<AddPage>
         _amountText = '0';
       }
     });
+  }
+
+  void _showAccountSelector() {
+    final accountsData = context.read<AccountsData>();
+    final accountOptions = accountsData.accountNames.map((account) => 
+      SelectionOption(
+        value: account,
+        label: account,
+        icon: LucideIcons.creditCard,
+      )
+    ).toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SelectionModal(
+        title: 'Select Account',
+        options: accountOptions,
+        selectedValue: _selectedAccount,
+        onSelectionChanged: (value) {
+          setState(() {
+            _selectedAccount = value;
+          });
+        },
+      ),
+    );
+  }
+
+  void _showCategorySelector() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SelectionModal(
+        title: 'Select Category',
+        options: _categoryOptions,
+        selectedValue: _selectedCategory,
+        onSelectionChanged: (value) {
+          setState(() {
+            _selectedCategory = value;
+          });
+        },
+      ),
+    );
+  }
+
+  void _showFromAccountSelector() {
+    final accountsData = context.read<AccountsData>();
+    final accountOptions = accountsData.accountNames.map((account) => 
+      SelectionOption(
+        value: account,
+        label: account,
+        icon: LucideIcons.creditCard,
+      )
+    ).toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SelectionModal(
+        title: 'Select From Account',
+        options: accountOptions,
+        selectedValue: _selectedFromAccount,
+        onSelectionChanged: (value) {
+          setState(() {
+            _selectedFromAccount = value;
+          });
+        },
+      ),
+    );
+  }
+
+  void _showToAccountSelector() {
+    final accountsData = context.read<AccountsData>();
+    final accountOptions = accountsData.accountNames.map((account) => 
+      SelectionOption(
+        value: account,
+        label: account,
+        icon: LucideIcons.creditCard,
+      )
+    ).toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SelectionModal(
+        title: 'Select To Account',
+        options: accountOptions,
+        selectedValue: _selectedToAccount,
+        onSelectionChanged: (value) {
+          setState(() {
+            _selectedToAccount = value;
+          });
+        },
+      ),
+    );
   }
 
   void _saveTransaction() {
@@ -142,6 +250,103 @@ class _AddPageState extends State<AddPage>
     });
   }
 
+  void _saveTransactionAndShowSnackbar() {
+    final amount = double.tryParse(_amountText);
+    if (amount == null || amount <= 0) {
+      _showSnackBar('Please enter a valid amount');
+      return;
+    }
+
+    // Get transaction type
+    final transactionTypes = [TransactionType.income, TransactionType.expense, TransactionType.transfer];
+    final type = transactionTypes[_selectedToggleIndex];
+
+    // Create transaction based on type
+    Transaction transaction;
+    
+    if (type == TransactionType.transfer) {
+      // For transfers, we need fromAccount and toAccount
+      if (_selectedFromAccount == null || _selectedToAccount == null) {
+        _showSnackBar('Please select both accounts for transfer');
+        return;
+      }
+      if (_selectedFromAccount == _selectedToAccount) {
+        _showSnackBar('Cannot transfer to the same account');
+        return;
+      }
+      
+      transaction = Transaction(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        type: type,
+        fromAccount: _selectedFromAccount,
+        toAccount: _selectedToAccount,
+        amount: amount,
+        date: DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          _selectedTime.hour,
+          _selectedTime.minute,
+        ),
+      );
+    } else {
+      // For income/expense, we need account and category
+      if (_selectedAccount == null) {
+        _showSnackBar('Please select an account');
+        return;
+      }
+
+      if (_selectedCategory == null) {
+        _showSnackBar('Please select a category');
+        return;
+      }
+      
+      transaction = Transaction(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        type: type,
+        account: _selectedAccount,
+        category: _selectedCategory,
+        notes: _notesController.text.trim(),
+        amount: amount,
+        date: DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          _selectedTime.hour,
+          _selectedTime.minute,
+        ),
+      );
+    }
+
+    // Add transaction to provider
+    context.read<TransactionProvider>().addTransaction(transaction);
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Transaction added!'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    // Reset form
+    setState(() {
+      _amountText = '0';
+      _selectedAccount = null;
+      _selectedCategory = null;
+      _selectedFromAccount = null;
+      _selectedToAccount = null;
+      _notesController.clear();
+      _selectedDate = DateTime.now();
+      _selectedTime = TimeOfDay.now();
+    });
+  }
+
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -192,318 +397,284 @@ class _AddPageState extends State<AddPage>
     return '$hour:$minute $period';
   }
 
+  Widget _buildSelectionField({
+    required String label,
+    required String? selectedValue,
+    required VoidCallback onTap,
+    required IconData icon,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.grey[600], size: 18),
+            SizedBox(width: gap),
+            Expanded(
+              child: Text(
+                selectedValue ?? label,
+                style: TextStyle(
+                  color: selectedValue != null ? Colors.black : Colors.grey[600],
+                  fontSize: 13,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(LucideIcons.chevronDown, color: Colors.grey[600], size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Important!
-    return Scaffold(
-      key: const PageStorageKey('add'),
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          onPressed: () {
-            // TODO: Implement cancel functionality
-          },
-          icon: const Icon(
-            Icons.close,
-            color: Colors.orange,
-            size: 24,
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: _saveTransaction,
-            icon: const Icon(
-              Icons.check,
-              color: Colors.orange,
-              size: 24,
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Segmented control for INCOME | EXPENSE | TRANSFER
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: ['INCOME', 'EXPENSE', 'TRANSFER'].asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final label = entry.value;
-                  final isSelected = index == _selectedToggleIndex;
-                  
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedToggleIndex = index;
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected ? Colors.orange : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          label,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.grey[700],
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
+    super.build(context);
+    final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+    final isKeyboardOpen = viewInsets > 0;
+
+    Widget mainContent = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Top App Bar Row: [Cancel] [Slider] [Save]
+          SizedBox(
+            height: 52.0,
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    LucideIcons.x,
+                    color: Colors.orange,
+                    size: 22,
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  );
-                }).toList(),
-              ),
+                    child: Row(
+                      children: ['INCOME', 'EXPENSE', 'TRANSFER'].asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final label = entry.value;
+                        final isSelected = index == _selectedToggleIndex;
+                        return Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedToggleIndex = index;
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.orange : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                label,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.grey[700],
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    _saveTransactionAndShowSnackbar();
+                  },
+                  icon: const Icon(
+                    LucideIcons.check,
+                    color: Colors.orange,
+                    size: 22,
+                  ),
+                ),
+              ],
             ),
-            
-            const SizedBox(height: 16),
-            
-            // Amount display
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
+          ),
+          SizedBox(height: gap + 2),
+          // Amount display
+          Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
               child: Text(
                 '₹$_amountText',
-                textAlign: TextAlign.right,
                 style: const TextStyle(
-                  fontSize: 36,
+                  fontSize: 34,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
             ),
-            
-            const SizedBox(height: 16),
-            
-            // Dynamic fields based on transaction type
-            Consumer<AccountsData>(
-              builder: (context, accountsData, child) {
-                final isTransfer = _selectedToggleIndex == 2; // TRANSFER
-                
-                if (isTransfer) {
-                  // Show From Account and To Account for transfers
-                  return Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedFromAccount,
-                              decoration: InputDecoration(
-                                labelText: 'From Account',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 16,
-                                ),
-                              ),
-                              items: accountsData.accountNames.map((String account) {
-                                return DropdownMenuItem<String>(
-                                  value: account,
-                                  child: Text(account),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _selectedFromAccount = newValue;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedToAccount,
-                              decoration: InputDecoration(
-                                labelText: 'To Account',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 16,
-                                ),
-                              ),
-                              items: accountsData.accountNames.map((String account) {
-                                return DropdownMenuItem<String>(
-                                  value: account,
-                                  child: Text(account),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _selectedToAccount = newValue;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                } else {
-                  // Show Account and Category for income/expense
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedAccount,
-                          decoration: InputDecoration(
-                            labelText: 'Select Account',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 16,
-                            ),
-                          ),
-                          items: accountsData.accountNames.map((String account) {
-                            return DropdownMenuItem<String>(
-                              value: account,
-                              child: Text(account),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedAccount = newValue;
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedCategory,
-                          decoration: InputDecoration(
-                            labelText: 'Select Category',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 16,
-                            ),
-                          ),
-                          items: _categories.map((String category) {
-                            return DropdownMenuItem<String>(
-                              value: category,
-                              child: Text(category),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedCategory = newValue;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              },
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Date and Time pickers
-            Row(
+          ),
+          SizedBox(height: gap + 2),
+          // Account and Category selectors side by side (for income/expense)
+          SizedBox(
+            height: 60,
+            child: Row(
               children: [
                 Expanded(
-                  child: InkWell(
-                    onTap: _selectDate,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _formatDate(_selectedDate),
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const Icon(Icons.calendar_today, color: Colors.grey),
-                        ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: _buildSelectionField(
+                      label: _selectedToggleIndex == 2 ? 'From Account' : 'Select Account',
+                      selectedValue: _selectedToggleIndex == 2 ? _selectedFromAccount : _selectedAccount,
+                      onTap: _selectedToggleIndex == 2 ? _showFromAccountSelector : _showAccountSelector,
+                      icon: LucideIcons.creditCard,
+                    ),
+                  ),
+                ),
+                SizedBox(width: gap),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: _buildSelectionField(
+                      label: _selectedToggleIndex == 2 ? 'To Account' : 'Select Category',
+                      selectedValue: _selectedToggleIndex == 2 ? _selectedToAccount : _selectedCategory,
+                      onTap: _selectedToggleIndex == 2 ? _showToAccountSelector : _showCategorySelector,
+                      icon: _selectedToggleIndex == 2 ? LucideIcons.creditCard : LucideIcons.tag,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: gap + 2),
+          // Date and Time pickers
+          SizedBox(
+            height: 56,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: GestureDetector(
+                      onTap: _selectDate,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                _formatDate(_selectedDate),
+                                style: const TextStyle(fontSize: 15),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const Icon(LucideIcons.calendar, color: Colors.grey, size: 20),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: gap),
                 Expanded(
-                  child: InkWell(
-                    onTap: _selectTime,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _formatTime(_selectedTime),
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const Icon(Icons.access_time, color: Colors.grey),
-                        ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: GestureDetector(
+                      onTap: _selectTime,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                _formatTime(_selectedTime),
+                                style: const TextStyle(fontSize: 15),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const Icon(LucideIcons.clock, color: Colors.grey, size: 20),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-            
-            // Notes text field (hidden for transfers)
-            if (_selectedToggleIndex != 2) // Not transfer
-              Column(
-                children: [
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _notesController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: 'Add notes...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.all(16),
-                    ),
+          ),
+          SizedBox(height: gap + 2),
+          // Notes field
+          SizedBox(
+            height: 64,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: TextField(
+                controller: _notesController,
+                maxLines: 2,
+                style: const TextStyle(fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Add notes...',
+                  prefixIcon: const Icon(LucideIcons.fileText, size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ],
+                  contentPadding: const EdgeInsets.all(16),
+                ),
               ),
-            
-            const SizedBox(height: 16),
-            
-            // Custom numeric keypad
-            CustomKeypad(
+            ),
+          ),
+          SizedBox(height: gap + 2),
+          // Keypad (fills remaining space)
+          Expanded(
+            flex: 3,
+            child: CustomKeypad(
               onDigitPressed: _onDigitPressed,
               onBackspace: _onBackspacePressed,
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
+    );
+
+    return Scaffold(
+      key: const PageStorageKey('add'),
+      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: isKeyboardOpen
+            ? SingleChildScrollView(child: mainContent)
+            : mainContent,
       ),
     );
   }

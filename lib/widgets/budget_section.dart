@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/budget_provider.dart';
 
 class BudgetSection extends StatefulWidget {
@@ -49,7 +50,7 @@ class _BudgetSectionState extends State<BudgetSection> {
                         _newCategoryController.clear();
                       }
                     },
-                    child: const Icon(Icons.add),
+                    child: const Icon(LucideIcons.plus),
                   ),
                 ],
               ),
