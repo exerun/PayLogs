@@ -91,14 +91,14 @@ class _HomePageState extends State<HomePage>
             Icon(
               Icons.receipt_long,
               size: 64,
-              color: Colors.grey.withValues(alpha: 0.6),
+              color: Colors.grey.withOpacity(0.6),
             ),
             const SizedBox(height: 16),
             Text(
               emptyMessage,
               style: TextStyle(
                 fontSize: 18,
-                color: Colors.grey.withValues(alpha: 0.8),
+                color: Colors.grey.withOpacity(0.8),
                 fontFamily: 'JetBrainsMono',
               ),
             ),
@@ -117,67 +117,75 @@ class _HomePageState extends State<HomePage>
       ..sort((a, b) => b.compareTo(a)); // Most recent first
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      itemCount: sortedDates.fold<int>(0, (sum, d) => sum + (grouped[d]?.length ?? 0) + 1),
-      itemBuilder: (context, index) {
-        int running = 0;
-        for (final date in sortedDates) {
-          if (index == running) {
-            return _buildDateDivider(date);
-          }
-          running++;
-          final txs = grouped[date]!;
-          if (index < running + txs.length) {
-            final tx = txs[index - running];
-            
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: TransactionCard(
-                transaction: tx,
-                onDelete: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Delete Transaction'),
-                      content: const Text('Are you sure you want to delete this transaction?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('Delete'),
-                          style: TextButton.styleFrom(foregroundColor: Colors.red),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmed != true) return;
-                  final provider = Provider.of<TransactionProvider>(context, listen: false);
-                  final idx = provider.transactions.indexWhere((t) => t.id == tx.id);
-                  final deleted = await provider.deleteTransactionById(tx.id);
-                  if (deleted != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Transaction deleted'),
-                        action: SnackBarAction(
-                          label: 'Undo',
-                          onPressed: () async {
-                            await provider.insertTransactionAt(deleted, idx);
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: sortedDates.length,
+      itemBuilder: (context, dateIndex) {
+        final date = sortedDates[dateIndex];
+        final txs = grouped[date]!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDateDivider(date),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: [
+                      for (final tx in txs)
+                        TransactionCard(
+                          transaction: tx,
+                          onDelete: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Delete Transaction'),
+                                content: const Text('Are you sure you want to delete this transaction?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(true),
+                                    child: const Text('Delete'),
+                                    style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirmed != true) return;
+                            final provider = Provider.of<TransactionProvider>(context, listen: false);
+                            final idx = provider.transactions.indexWhere((t) => t.id == tx.id);
+                            final deleted = await provider.deleteTransactionById(tx.id);
+                            if (deleted != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Transaction deleted'),
+                                  action: SnackBarAction(
+                                    label: 'Undo',
+                                    onPressed: () async {
+                                      await provider.insertTransactionAt(deleted, idx);
+                                    },
+                                  ),
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                            }
                           },
                         ),
-                        duration: const Duration(seconds: 3),
-                      ),
-                    );
-                  }
-                },
+                    ],
+                  ),
+                ),
               ),
-            );
-          }
-          running += txs.length;
-        }
-        return const SizedBox.shrink();
+            ),
+            const SizedBox(height: 16), // Spacing between date groups
+          ],
+        );
       },
     );
   }
