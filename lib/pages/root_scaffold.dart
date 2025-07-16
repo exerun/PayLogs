@@ -43,6 +43,7 @@ class _RootScaffoldState extends State<RootScaffold> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      extendBody: true,
       backgroundColor: Colors.white,
       body: IndexedStack(
         index: _currentIndex,
@@ -55,15 +56,14 @@ class _RootScaffoldState extends State<RootScaffold> {
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 24),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: theme.scaffoldBackgroundColor.withOpacity(theme.brightness == Brightness.dark ? 0.92 : 0.98),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.amber.withOpacity(0.18)
+                    : Colors.amber.withOpacity(0.22),
+                width: 1.2,
+              ),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -73,11 +73,15 @@ class _RootScaffoldState extends State<RootScaffold> {
                   for (int i = 0; i < 5; i++)
                     GestureDetector(
                       onTap: () => setState(() => _currentIndex = i),
-                      child: Container(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        curve: Curves.easeInOut,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: _currentIndex == i
                             ? BoxDecoration(
-                                color: Colors.amber[300] ?? theme.colorScheme.primary,
+                                color: theme.brightness == Brightness.dark
+                                    ? Colors.amber[700]?.withOpacity(0.18)
+                                    : Colors.amber[200]?.withOpacity(0.38),
                                 borderRadius: BorderRadius.circular(50),
                               )
                             : null,
@@ -89,7 +93,11 @@ class _RootScaffoldState extends State<RootScaffold> {
                             LucideIcons.wallet,
                             LucideIcons.image,
                           ][i],
-                          color: _currentIndex == i ? Colors.amber[800] : Colors.grey[700],
+                          color: _currentIndex == i
+                              ? (theme.brightness == Brightness.dark
+                                  ? Colors.amber[200]
+                                  : Colors.amber[800])
+                              : theme.iconTheme.color,
                           size: 26,
                         ),
                       ),

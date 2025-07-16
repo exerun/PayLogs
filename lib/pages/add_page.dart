@@ -8,6 +8,7 @@ import '../widgets/custom_keypad.dart';
 import '../widgets/selection_modal.dart';
 
 const double gap = 14.0;
+const double fieldHeight = 56.0;
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -28,21 +29,23 @@ class _AddPageState extends State<AddPage>
   String? _selectedFromAccount;
   String? _selectedToAccount;
   final TextEditingController _notesController = TextEditingController();
+  final FocusNode _notesFocusNode = FocusNode();
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
 
   // Category options with Lucide icons
-  final List<SelectionOption> _categoryOptions = [
-    const SelectionOption(value: 'Food', label: 'Food', icon: LucideIcons.utensils),
-    const SelectionOption(value: 'Transport', label: 'Transport', icon: LucideIcons.car),
-    const SelectionOption(value: 'Electronics', label: 'Electronics', icon: LucideIcons.smartphone),
-    const SelectionOption(value: 'Rent', label: 'Rent', icon: LucideIcons.home),
-    const SelectionOption(value: 'Shopping', label: 'Shopping', icon: LucideIcons.shoppingBag),
-    const SelectionOption(value: 'Entertainment', label: 'Entertainment', icon: LucideIcons.tv),
-    const SelectionOption(value: 'Health', label: 'Health', icon: LucideIcons.heart),
-    const SelectionOption(value: 'Education', label: 'Education', icon: LucideIcons.bookOpen),
-    const SelectionOption(value: 'Others', label: 'Others', icon: LucideIcons.moreHorizontal),
+  final List<SelectionOption> _defaultCategoryOptions = [
+    SelectionOption(value: 'Food', label: 'Food', icon: LucideIcons.utensils),
+    SelectionOption(value: 'Transport', label: 'Transport', icon: LucideIcons.car),
+    SelectionOption(value: 'Electronics', label: 'Electronics', icon: LucideIcons.smartphone),
+    SelectionOption(value: 'Rent', label: 'Rent', icon: LucideIcons.home),
+    SelectionOption(value: 'Shopping', label: 'Shopping', icon: LucideIcons.shoppingBag),
+    SelectionOption(value: 'Entertainment', label: 'Entertainment', icon: LucideIcons.tv),
+    SelectionOption(value: 'Health', label: 'Health', icon: LucideIcons.heart),
+    SelectionOption(value: 'Education', label: 'Education', icon: LucideIcons.bookOpen),
+    SelectionOption(value: 'Others', label: 'Others', icon: LucideIcons.moreHorizontal),
   ];
+  List<SelectionOption> _customCategoryOptions = [];
 
   void _onDigitPressed(String digit) {
     setState(() {
@@ -91,21 +94,120 @@ class _AddPageState extends State<AddPage>
     );
   }
 
-  void _showCategorySelector() {
-    showModalBottomSheet(
+  void _showCategorySelector() async {
+    // Compose the full list with custom categories
+    final allOptions = [
+      ..._defaultCategoryOptions,
+      ..._customCategoryOptions,
+      SelectionOption(
+        value: '__add__',
+        label: 'Add Category',
+        icon: LucideIcons.plusCircle,
+      ),
+    ];
+
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => SelectionModal(
         title: 'Select Category',
-        options: _categoryOptions,
+        options: allOptions,
         selectedValue: _selectedCategory,
-        onSelectionChanged: (value) {
-          setState(() {
-            _selectedCategory = value;
-          });
+        onSelectionChanged: (value) async {
+          if (value == '__add__') {
+            final newCategory = await _showAddCategoryDialog();
+            if (newCategory != null) {
+              setState(() {
+                _customCategoryOptions.add(newCategory);
+                _selectedCategory = newCategory.value;
+              });
+              Navigator.of(context).pop();
+            }
+          } else {
+            setState(() {
+              _selectedCategory = value;
+            });
+          }
         },
       ),
+    );
+  }
+
+  Future<SelectionOption?> _showAddCategoryDialog() async {
+    final TextEditingController nameController = TextEditingController();
+    final List<IconData> iconChoices = [
+      LucideIcons.star,
+      LucideIcons.smile,
+      LucideIcons.sun,
+      LucideIcons.moon,
+      LucideIcons.heart,
+      LucideIcons.book,
+      LucideIcons.briefcase,
+      LucideIcons.camera,
+      LucideIcons.gift,
+      LucideIcons.music,
+      LucideIcons.pizza,
+      LucideIcons.shoppingCart,
+      LucideIcons.trophy,
+      LucideIcons.zap,
+    ];
+    IconData selectedIcon = (iconChoices..shuffle()).first;
+    return await showDialog<SelectionOption>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add New Category'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Category Name',
+                  border: OutlineInputBorder(),
+                ),
+                autofocus: true,
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 10,
+                children: iconChoices.map((icon) {
+                  return ChoiceChip(
+                    label: Icon(icon, size: 22),
+                    selected: selectedIcon == icon,
+                    onSelected: (_) {
+                      selectedIcon = icon;
+                      (context as Element).markNeedsBuild();
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final name = nameController.text.trim();
+                if (name.isNotEmpty) {
+                  Navigator.of(context).pop(
+                    SelectionOption(
+                      value: name,
+                      label: name,
+                      icon: selectedIcon,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -324,13 +426,14 @@ class _AddPageState extends State<AddPage>
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Transaction added!'),
+        content: const Text('Transaction added'),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(14),
         ),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
       ),
     );
 
@@ -344,6 +447,13 @@ class _AddPageState extends State<AddPage>
       _notesController.clear();
       _selectedDate = DateTime.now();
       _selectedTime = TimeOfDay.now();
+    });
+
+    // Auto-close Add Page and navigate to Home after a short delay for snackbar
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     });
   }
 
@@ -450,7 +560,7 @@ class _AddPageState extends State<AddPage>
               children: [
                 IconButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   icon: const Icon(
                     LucideIcons.x,
@@ -514,23 +624,26 @@ class _AddPageState extends State<AddPage>
           ),
           SizedBox(height: gap + 2),
           // Amount display
-          Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
+          SizedBox(
+            height: fieldHeight,
+            child: Container(
               alignment: Alignment.centerRight,
-              child: Text(
-                '₹$_amountText',
-                style: const TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '₹$_amountText',
+                  style: const TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
             ),
@@ -538,7 +651,7 @@ class _AddPageState extends State<AddPage>
           SizedBox(height: gap + 2),
           // Account and Category selectors side by side (for income/expense)
           SizedBox(
-            height: 60,
+            height: fieldHeight,
             child: Row(
               children: [
                 Expanded(
@@ -570,7 +683,7 @@ class _AddPageState extends State<AddPage>
           SizedBox(height: gap + 2),
           // Date and Time pickers
           SizedBox(
-            height: 56,
+            height: fieldHeight,
             child: Row(
               children: [
                 Expanded(
@@ -636,13 +749,15 @@ class _AddPageState extends State<AddPage>
           SizedBox(height: gap + 2),
           // Notes field
           SizedBox(
-            height: 64,
+            height: fieldHeight,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: TextField(
                 controller: _notesController,
+                focusNode: _notesFocusNode,
                 maxLines: 2,
                 style: const TextStyle(fontSize: 14),
+                autofocus: true,
                 decoration: InputDecoration(
                   hintText: 'Add notes...',
                   prefixIcon: const Icon(LucideIcons.fileText, size: 20),
@@ -651,6 +766,9 @@ class _AddPageState extends State<AddPage>
                   ),
                   contentPadding: const EdgeInsets.all(16),
                 ),
+                onTap: () {
+                  _notesFocusNode.requestFocus();
+                },
               ),
             ),
           ),
@@ -671,10 +789,20 @@ class _AddPageState extends State<AddPage>
       key: const PageStorageKey('add'),
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: isKeyboardOpen
-            ? SingleChildScrollView(child: mainContent)
-            : mainContent,
+      body: WillPopScope(
+        onWillPop: () async {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          return false;
+        },
+        child: SafeArea(
+          child: MediaQuery.removeViewInsets(
+            context: context,
+            removeBottom: false,
+            child: isKeyboardOpen
+                ? SingleChildScrollView(child: mainContent)
+                : mainContent,
+          ),
+        ),
       ),
     );
   }
@@ -682,6 +810,7 @@ class _AddPageState extends State<AddPage>
   @override
   void dispose() {
     _notesController.dispose();
+    _notesFocusNode.dispose();
     super.dispose();
   }
 } 

@@ -12,10 +12,14 @@ class BudgetSection extends StatefulWidget {
 
 class _BudgetSectionState extends State<BudgetSection> {
   final TextEditingController _newCategoryController = TextEditingController();
+  final Map<String, TextEditingController> _controllers = {};
 
   @override
   void dispose() {
     _newCategoryController.dispose();
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -48,6 +52,8 @@ class _BudgetSectionState extends State<BudgetSection> {
                       if (newCategory.isNotEmpty) {
                         budgetProvider.addCategory(newCategory);
                         _newCategoryController.clear();
+                        // Create a controller for the new category
+                        _controllers[newCategory] = TextEditingController();
                       }
                     },
                     child: const Icon(LucideIcons.plus),
@@ -62,7 +68,15 @@ class _BudgetSectionState extends State<BudgetSection> {
                 itemBuilder: (context, index) {
                   final category = budgets.keys.elementAt(index);
                   final amount = budgets[category]!;
-                  final controller = TextEditingController(text: amount == 0.0 ? '' : amount.toStringAsFixed(0));
+                  final controller = _controllers.putIfAbsent(
+                    category,
+                    () => TextEditingController(text: amount == 0.0 ? '' : amount.toStringAsFixed(0)),
+                  );
+                  // Keep controller in sync with provider if changed elsewhere
+                  if (controller.text != (amount == 0.0 ? '' : amount.toStringAsFixed(0))) {
+                    controller.text = amount == 0.0 ? '' : amount.toStringAsFixed(0);
+                    controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+                  }
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     child: Padding(

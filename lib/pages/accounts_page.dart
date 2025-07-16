@@ -74,15 +74,18 @@ class _AccountsPageState extends State<AccountsPage>
     super.build(context); // Important!
     return Scaffold(
       key: const PageStorageKey('accounts'),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Accounts',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onBackground,
+          ),
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.background,
       ),
       body: Consumer<AccountsData>(
         builder: (context, accountsData, child) {
@@ -105,9 +108,9 @@ class _AccountsPageState extends State<AccountsPage>
                           color: Colors.blue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(25),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           LucideIcons.building2,
-                          color: Colors.blue,
+                          color: Theme.of(context).iconTheme.color,
                           size: 24,
                         ),
                       ),
@@ -139,7 +142,7 @@ class _AccountsPageState extends State<AccountsPage>
                         onPressed: () {
                           // TODO: Implement edit functionality
                         },
-                        icon: const Icon(LucideIcons.edit, color: Colors.grey),
+                        icon: Icon(LucideIcons.edit, color: Theme.of(context).iconTheme.color),
                       ),
                     ],
                   ),
@@ -149,11 +152,26 @@ class _AccountsPageState extends State<AccountsPage>
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddAccountDialog(context),
-        backgroundColor: Colors.blue,
-        child: const Icon(LucideIcons.plus, color: Colors.white),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80.0),
+        child: FloatingActionButton.extended(
+          onPressed: () => _showAddAccountDialog(context),
+          backgroundColor: Colors.orange,
+          icon: const Icon(LucideIcons.plus, color: Colors.white),
+          label: const Text(
+            'Add',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32),
+          ),
+          elevation: 6,
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 } 

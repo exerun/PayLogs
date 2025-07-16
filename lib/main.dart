@@ -5,6 +5,8 @@ import 'pages/root_scaffold.dart';
 import 'data/accounts_data.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/budget_provider.dart';
+import 'providers/theme_notifier.dart';
+import 'providers/currency_provider.dart';
 
 import 'package:flutter/services.dart';
 import 'widgets/screenshot_import_sheet.dart';
@@ -24,21 +26,56 @@ class PayLogsApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => AccountsData()),
         ChangeNotifierProvider(create: (context) => TransactionProvider()),
         ChangeNotifierProvider(create: (context) => BudgetProvider()),
+        ChangeNotifierProvider(create: (context) => ThemeNotifier()),
+        ChangeNotifierProvider(create: (context) => CurrencyProvider()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'PayLogs',
-        theme: ThemeData(
-          colorSchemeSeed: Colors.indigo,
-          useMaterial3: true,
-          textTheme: GoogleFonts.jetBrainsMonoTextTheme(),
-        ),
-        home: const ResponsiveLayout(
-          child: _ShareIntentHandler(),
-        ),
+      child: Consumer<ThemeNotifier>(
+        builder: (context, themeNotifier, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'PayLogs',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange, brightness: Brightness.light),
+              useMaterial3: true,
+              textTheme: GoogleFonts.jetBrainsMonoTextTheme(),
+            ),
+            darkTheme: ThemeData(
+              colorScheme: _customDarkScheme(),
+              useMaterial3: true,
+              textTheme: GoogleFonts.jetBrainsMonoTextTheme(
+                ThemeData(brightness: Brightness.dark).textTheme.apply(
+                  bodyColor: Colors.white,
+                  displayColor: Colors.white,
+                ),
+              ),
+              scaffoldBackgroundColor: Colors.black,
+              canvasColor: Colors.black,
+            ),
+            themeMode: themeNotifier.themeMode,
+            home: const ResponsiveLayout(
+              child: _ShareIntentHandler(),
+            ),
+          );
+        },
       ),
     );
   }
+}
+
+ColorScheme _customDarkScheme() {
+  return ColorScheme.fromSeed(
+    seedColor: Colors.deepOrange.shade700,
+    brightness: Brightness.dark,
+  ).copyWith(
+    background: Colors.black,
+    surface: Colors.grey[900],
+    primary: Colors.deepOrange.shade400,
+    secondary: Colors.amber.shade700,
+    onBackground: Colors.white,
+    onSurface: Colors.white,
+    onPrimary: Colors.white,
+    onSecondary: Colors.white,
+  );
 }
 
 class _ShareIntentHandler extends StatefulWidget {

@@ -66,7 +66,9 @@ class SelectionModal extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     onSelectionChanged(option.value);
-                    Navigator.pop(context);
+                    if (option.value != '__add__') {
+                      Navigator.pop(context);
+                    }
                   },
                   child: Container(
                     decoration: BoxDecoration(

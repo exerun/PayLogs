@@ -21,12 +21,12 @@ class _ManagePageState extends State<ManagePage>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Manage'),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.background,
       ),
       body: Column(
         children: [
@@ -41,7 +41,7 @@ class _ManagePageState extends State<ManagePage>
               selectedColor: Colors.white,
               fillColor: Colors.indigo,
               color: Colors.indigo,
-              textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
               constraints: const BoxConstraints(minHeight: 40, minWidth: 120),
               children: _tabs.map((tab) => Text(tab)).toList(),
             ),

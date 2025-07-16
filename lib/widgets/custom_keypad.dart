@@ -33,19 +33,19 @@ class CustomKeypad extends StatelessWidget {
                 width: buttonWidth,
                 height: buttonHeight,
                 child: Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  color: const Color(0xFFF3F3F3),
+                  borderRadius: BorderRadius.circular(22),
                   child: InkWell(
                     onTap: () => onDigitPressed(digit),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(22),
                     child: Center(
                       child: Text(
                         digit,
-                        style: TextStyle(
-                          fontFamily: 'JetBrainsMono',
+                        style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
+                          fontFamily: 'JetBrains Mono',
+                          color: Color(0xFF444444),
                         ),
                       ),
                     ),
@@ -59,16 +59,16 @@ class CustomKeypad extends StatelessWidget {
                 width: buttonWidth,
                 height: buttonHeight,
                 child: Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  color: const Color(0xFFF3F3F3),
+                  borderRadius: BorderRadius.circular(22),
                   child: InkWell(
                     onTap: onBackspace,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(22),
                     child: const Center(
                       child: Icon(
                         LucideIcons.delete,
                         size: 28,
-                        color: Colors.black87,
+                        color: Color(0xFF444444),
                       ),
                     ),
                   ),

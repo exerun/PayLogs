@@ -115,14 +115,14 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
           Icon(
             LucideIcons.monitor,
             size: 64,
-            color: Colors.grey[400],
+            color: Theme.of(context).iconTheme.color,
           ),
           const SizedBox(height: 16),
           Text(
             'No screenshots yet',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onBackground,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -131,7 +131,7 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
             'Tap the + button to import your first screenshot',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -146,15 +146,18 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
 
     return Scaffold(
       key: const PageStorageKey('screenshots'),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text(
           'Screenshots',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.background,
       ),
       body: _screenshots.isEmpty
           ? _buildEmptyState()
@@ -169,13 +172,26 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
               itemCount: _screenshots.length,
               itemBuilder: (context, index) => _buildScreenshotTile(index),
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _importScreenshot,
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
-        icon: const Icon(LucideIcons.plus),
-        label: const Text('Import'),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80.0),
+        child: FloatingActionButton.extended(
+          onPressed: _importScreenshot,
+          backgroundColor: Colors.orange,
+          icon: const Icon(LucideIcons.plus, color: Colors.white),
+          label: const Text(
+            'Add',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32),
+          ),
+          elevation: 6,
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 } 

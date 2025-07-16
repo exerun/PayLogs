@@ -5,6 +5,7 @@ import 'add_page.dart';
 import '../widgets/expense_item.dart';
 import '../providers/transaction_provider.dart';
 import '../models/transaction.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -54,15 +55,27 @@ class _HomePageState extends State<HomePage>
     
     return Scaffold(
       key: const PageStorageKey('home'),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text(
+        leading: IconButton(
+          icon: Icon(Icons.settings, color: Theme.of(context).iconTheme.color),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
+            );
+          },
+        ),
+        title: Text(
           'PayLogs',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onBackground,
+          ),
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.background,
       ),
       body: Consumer<TransactionProvider>(
         builder: (context, transactionProvider, child) {
@@ -116,12 +129,15 @@ class _HomePageState extends State<HomePage>
         },
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 18.0), // margin above nav bar
+        padding: const EdgeInsets.only(bottom: 80.0), // sits well above nav bar
         child: FloatingActionButton.extended(
           onPressed: () async {
             await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const AddPage()),
+              MaterialPageRoute(
+                builder: (context) => const AddPage(),
+                fullscreenDialog: true,
+              ),
             );
           },
           backgroundColor: Colors.orange,
@@ -129,7 +145,6 @@ class _HomePageState extends State<HomePage>
           label: const Text(
             'Add',
             style: TextStyle(
-              fontFamily: 'JetBrainsMono',
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
@@ -137,7 +152,7 @@ class _HomePageState extends State<HomePage>
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(32), // pill shape
           ),
-          elevation: 4,
+          elevation: 6,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
