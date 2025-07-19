@@ -23,6 +23,77 @@ class _BudgetSectionState extends State<BudgetSection> {
     super.dispose();
   }
 
+  void _showEditBudgetDialog(BuildContext context, String category, double amount) {
+    final controller = TextEditingController(text: amount == 0.0 ? '' : amount.toStringAsFixed(0));
+    bool _isSaving = false;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Edit Budget for $category'),
+              content: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Monthly Budget',
+                  prefixText: '₹',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: _isSaving ? null : () async {
+                    setState(() => _isSaving = true);
+                    final newValue = double.tryParse(controller.text) ?? 0.0;
+                    await context.read<BudgetProvider>().updateBudget(category, newValue);
+                    Navigator.of(context).pop();
+                    setState(() => _isSaving = false);
+                  },
+                  child: const Text('Save'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  tooltip: 'Delete',
+                  onPressed: _isSaving ? null : () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete Category'),
+                        content: const Text('Are you sure you want to delete this category?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) {
+                      setState(() => _isSaving = true);
+                      await context.read<BudgetProvider>().removeCategory(category);
+                      Navigator.of(context).pop();
+                      setState(() => _isSaving = false);
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<BudgetProvider>(
@@ -79,35 +150,15 @@ class _BudgetSectionState extends State<BudgetSection> {
                   }
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              category,
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: TextField(
-                              controller: controller,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Monthly Budget',
-                                prefixText: '₹',
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                              ),
-                              onChanged: (value) {
-                                final newValue = double.tryParse(value) ?? 0.0;
-                                budgetProvider.setBudget(category, newValue);
-                              },
-                            ),
-                          ),
-                        ],
+                    child: ListTile(
+                      title: Text(
+                        category,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text('Budget: ₹${amount.toStringAsFixed(0)}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _showEditBudgetDialog(context, category, amount),
                       ),
                     ),
                   );

@@ -24,6 +24,7 @@ class _AddPageState extends State<AddPage>
   final TextEditingController _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
+  bool _isSaving = false;
 
   final List<String> _categories = [
     "Food",
@@ -53,21 +54,26 @@ class _AddPageState extends State<AddPage>
     });
   }
 
-  void _saveTransaction() {
+  Future<void> _saveTransaction() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
     // Validate fields
     if (_selectedAccount == null) {
       _showSnackBar('Please select an account');
+      setState(() => _isSaving = false);
       return;
     }
     
     if (_selectedCategory == null) {
       _showSnackBar('Please select a category');
+      setState(() => _isSaving = false);
       return;
     }
     
     final amount = double.tryParse(_amountText);
     if (amount == null || amount <= 0) {
       _showSnackBar('Please enter a valid amount');
+      setState(() => _isSaving = false);
       return;
     }
 
@@ -93,7 +99,7 @@ class _AddPageState extends State<AddPage>
     );
 
     // Add transaction to provider
-    context.read<TransactionProvider>().addTransaction(transaction);
+    await context.read<TransactionProvider>().addTransaction(transaction);
 
     // Show success message
     _showSnackBar('Transaction saved successfully!');
@@ -107,6 +113,7 @@ class _AddPageState extends State<AddPage>
       _selectedDate = DateTime.now();
       _selectedTime = TimeOfDay.now();
     });
+    setState(() => _isSaving = false);
   }
 
   void _showSnackBar(String message) {
@@ -180,7 +187,7 @@ class _AddPageState extends State<AddPage>
         ),
         actions: [
           IconButton(
-            onPressed: _saveTransaction,
+            onPressed: _isSaving ? null : () async { await _saveTransaction(); },
             icon: const Icon(
               Icons.check,
               color: Colors.orange,

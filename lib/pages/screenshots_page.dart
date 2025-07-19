@@ -131,7 +131,7 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
             'Tap the + button to import your first screenshot',
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: Theme.of(context).colorScheme.onBackground,
             ),
             textAlign: TextAlign.center,
           ),

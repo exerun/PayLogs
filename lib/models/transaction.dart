@@ -9,9 +9,12 @@ class Transaction {
   final double amount;
   final String? notes;
   final String? category;
-  final String? account;
-  final String? fromAccount;
-  final String? toAccount;
+  final int? accountId;
+  final int? fromAccountId;
+  final int? toAccountId;
+  final String? account; // for display only
+  final String? fromAccount; // for display only
+  final String? toAccount; // for display only
   final DateTime date;
   final TransactionType type;
 
@@ -20,6 +23,9 @@ class Transaction {
     required this.amount,
     this.notes,
     this.category,
+    this.accountId,
+    this.fromAccountId,
+    this.toAccountId,
     this.account,
     this.fromAccount,
     this.toAccount,
@@ -32,6 +38,9 @@ class Transaction {
     double? amount,
     String? notes,
     String? category,
+    int? accountId,
+    int? fromAccountId,
+    int? toAccountId,
     String? account,
     String? fromAccount,
     String? toAccount,
@@ -43,6 +52,9 @@ class Transaction {
       amount: amount ?? this.amount,
       notes: notes ?? this.notes,
       category: category ?? this.category,
+      accountId: accountId ?? this.accountId,
+      fromAccountId: fromAccountId ?? this.fromAccountId,
+      toAccountId: toAccountId ?? this.toAccountId,
       account: account ?? this.account,
       fromAccount: fromAccount ?? this.fromAccount,
       toAccount: toAccount ?? this.toAccount,
@@ -57,6 +69,9 @@ class Transaction {
       'amount': amount,
       'notes': notes,
       'category': category,
+      'accountId': accountId,
+      'fromAccountId': fromAccountId,
+      'toAccountId': toAccountId,
       'account': account,
       'fromAccount': fromAccount,
       'toAccount': toAccount,
@@ -71,6 +86,9 @@ class Transaction {
       amount: json['amount'].toDouble(),
       notes: json['notes'],
       category: json['category'],
+      accountId: json['accountId'],
+      fromAccountId: json['fromAccountId'],
+      toAccountId: json['toAccountId'],
       account: json['account'],
       fromAccount: json['fromAccount'],
       toAccount: json['toAccount'],

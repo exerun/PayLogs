@@ -69,6 +69,96 @@ class _AccountsPageState extends State<AccountsPage>
     );
   }
 
+  void _showEditAccountDialog(BuildContext context, Account account) {
+    final nameController = TextEditingController(text: account.name);
+    final balanceController = TextEditingController(text: account.balance.toString());
+    bool _isSaving = false;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Edit Account'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Account Name',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: balanceController,
+                    decoration: const InputDecoration(
+                      labelText: 'Balance',
+                      border: OutlineInputBorder(),
+                      prefixText: '₹',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: _isSaving ? null : () async {
+                    setState(() => _isSaving = true);
+                    final name = nameController.text.trim();
+                    final balance = double.tryParse(balanceController.text) ?? 0.0;
+                    if (name.isNotEmpty) {
+                      await context.read<AccountsData>().updateAccount(
+                        Account(id: account.id, name: name, balance: balance),
+                      );
+                      Navigator.of(context).pop();
+                    }
+                    setState(() => _isSaving = false);
+                  },
+                  child: const Text('Save'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  tooltip: 'Delete',
+                  onPressed: _isSaving ? null : () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete Account'),
+                        content: const Text('Are you sure you want to delete this account?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) {
+                      setState(() => _isSaving = true);
+                      await context.read<AccountsData>().deleteAccount(account.id!);
+                      Navigator.of(context).pop();
+                      setState(() => _isSaving = false);
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Important!
@@ -140,7 +230,7 @@ class _AccountsPageState extends State<AccountsPage>
                       ),
                       IconButton(
                         onPressed: () {
-                          // TODO: Implement edit functionality
+                          _showEditAccountDialog(context, account);
                         },
                         icon: Icon(LucideIcons.edit, color: Theme.of(context).iconTheme.color),
                       ),

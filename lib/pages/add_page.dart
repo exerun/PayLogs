@@ -32,6 +32,7 @@ class _AddPageState extends State<AddPage>
   final FocusNode _notesFocusNode = FocusNode();
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
+  bool _isSaving = false;
 
   // Category options with Lucide icons
   final List<SelectionOption> _defaultCategoryOptions = [
@@ -265,10 +266,13 @@ class _AddPageState extends State<AddPage>
     );
   }
 
-  void _saveTransaction() {
+  Future<void> _saveTransaction() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
     final amount = double.tryParse(_amountText);
     if (amount == null || amount <= 0) {
       _showSnackBar('Please enter a valid amount');
+      setState(() => _isSaving = false);
       return;
     }
 
@@ -283,18 +287,24 @@ class _AddPageState extends State<AddPage>
       // For transfers, we need fromAccount and toAccount
       if (_selectedFromAccount == null || _selectedToAccount == null) {
         _showSnackBar('Please select both accounts for transfer');
+        setState(() => _isSaving = false);
         return;
       }
       if (_selectedFromAccount == _selectedToAccount) {
         _showSnackBar('Cannot transfer to the same account');
+        setState(() => _isSaving = false);
         return;
       }
-      
+      final accountsData = context.read<AccountsData>();
+      final fromAcc = accountsData.accounts.firstWhere((a) => a.name == _selectedFromAccount);
+      final toAcc = accountsData.accounts.firstWhere((a) => a.name == _selectedToAccount);
       transaction = Transaction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         type: type,
-        fromAccount: _selectedFromAccount,
-        toAccount: _selectedToAccount,
+        fromAccountId: fromAcc.id,
+        toAccountId: toAcc.id,
+        fromAccount: fromAcc.name,
+        toAccount: toAcc.name,
         amount: amount,
         date: DateTime(
           _selectedDate.year,
@@ -308,18 +318,21 @@ class _AddPageState extends State<AddPage>
       // For income/expense, we need account and category
       if (_selectedAccount == null) {
         _showSnackBar('Please select an account');
+        setState(() => _isSaving = false);
         return;
       }
-
       if (_selectedCategory == null) {
         _showSnackBar('Please select a category');
+        setState(() => _isSaving = false);
         return;
       }
-      
+      final accountsData = context.read<AccountsData>();
+      final acc = accountsData.accounts.firstWhere((a) => a.name == _selectedAccount);
       transaction = Transaction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         type: type,
-        account: _selectedAccount,
+        accountId: acc.id,
+        account: acc.name,
         category: _selectedCategory,
         notes: _notesController.text.trim(),
         amount: amount,
@@ -334,7 +347,7 @@ class _AddPageState extends State<AddPage>
     }
 
     // Add transaction to provider
-    context.read<TransactionProvider>().addTransaction(transaction);
+    await context.read<TransactionProvider>().addTransaction(transaction, context);
 
     // Show success message
     _showSnackBar('Transaction saved successfully!');
@@ -350,12 +363,16 @@ class _AddPageState extends State<AddPage>
       _selectedDate = DateTime.now();
       _selectedTime = TimeOfDay.now();
     });
+    setState(() => _isSaving = false);
   }
 
-  void _saveTransactionAndShowSnackbar() {
+  Future<void> _saveTransactionAndShowSnackbar() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
     final amount = double.tryParse(_amountText);
     if (amount == null || amount <= 0) {
       _showSnackBar('Please enter a valid amount');
+      setState(() => _isSaving = false);
       return;
     }
 
@@ -370,18 +387,25 @@ class _AddPageState extends State<AddPage>
       // For transfers, we need fromAccount and toAccount
       if (_selectedFromAccount == null || _selectedToAccount == null) {
         _showSnackBar('Please select both accounts for transfer');
+        setState(() => _isSaving = false);
         return;
       }
       if (_selectedFromAccount == _selectedToAccount) {
         _showSnackBar('Cannot transfer to the same account');
+        setState(() => _isSaving = false);
         return;
       }
       
+      final accountsData = context.read<AccountsData>();
+      final fromAcc = accountsData.accounts.firstWhere((a) => a.name == _selectedFromAccount);
+      final toAcc = accountsData.accounts.firstWhere((a) => a.name == _selectedToAccount);
       transaction = Transaction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         type: type,
-        fromAccount: _selectedFromAccount,
-        toAccount: _selectedToAccount,
+        fromAccountId: fromAcc.id,
+        toAccountId: toAcc.id,
+        fromAccount: fromAcc.name,
+        toAccount: toAcc.name,
         amount: amount,
         date: DateTime(
           _selectedDate.year,
@@ -395,18 +419,23 @@ class _AddPageState extends State<AddPage>
       // For income/expense, we need account and category
       if (_selectedAccount == null) {
         _showSnackBar('Please select an account');
+        setState(() => _isSaving = false);
         return;
       }
 
       if (_selectedCategory == null) {
         _showSnackBar('Please select a category');
+        setState(() => _isSaving = false);
         return;
       }
       
+      final accountsData = context.read<AccountsData>();
+      final acc = accountsData.accounts.firstWhere((a) => a.name == _selectedAccount);
       transaction = Transaction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         type: type,
-        account: _selectedAccount,
+        accountId: acc.id,
+        account: acc.name,
         category: _selectedCategory,
         notes: _notesController.text.trim(),
         amount: amount,
@@ -421,7 +450,7 @@ class _AddPageState extends State<AddPage>
     }
 
     // Add transaction to provider
-    context.read<TransactionProvider>().addTransaction(transaction);
+    await context.read<TransactionProvider>().addTransaction(transaction, context);
 
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
@@ -455,6 +484,7 @@ class _AddPageState extends State<AddPage>
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
     });
+    setState(() => _isSaving = false);
   }
 
   void _showSnackBar(String message) {
@@ -610,8 +640,8 @@ class _AddPageState extends State<AddPage>
                   ),
                 ),
                 IconButton(
-                  onPressed: () {
-                    _saveTransactionAndShowSnackbar();
+                  onPressed: _isSaving ? null : () async {
+                    await _saveTransactionAndShowSnackbar();
                   },
                   icon: const Icon(
                     LucideIcons.check,

@@ -24,6 +24,7 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
   String? _selectedCategory;
   String? _selectedAccount;
   final DateTime _currentDateTime = DateTime.now();
+  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -31,7 +32,9 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
     super.dispose();
   }
 
-  void _saveTransaction() {
+  Future<void> _saveTransaction() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
     if (_selectedAccount == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -39,11 +42,10 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
           backgroundColor: Colors.red,
         ),
       );
+      setState(() => _isSaving = false);
       return;
     }
-
     final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
-    
     final transaction = Transaction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       amount: 0.0, // Placeholder - will be detected later
@@ -53,16 +55,14 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
       date: _currentDateTime,
       type: TransactionType.expense,
     );
-
-    transactionProvider.addTransaction(transaction);
-
+    await transactionProvider.addTransaction(transaction, context);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Screenshot saved successfully!'),
         backgroundColor: Colors.green,
       ),
     );
-
+    setState(() => _isSaving = false);
     Navigator.pop(context);
   }
 
@@ -312,7 +312,7 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _saveTransaction,
+                          onPressed: _isSaving ? null : () async { await _saveTransaction(); },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.indigo,
                             padding: const EdgeInsets.symmetric(vertical: 16),
