@@ -60,8 +60,8 @@ class _RootScaffoldState extends State<RootScaffold> {
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: theme.brightness == Brightness.dark
-                    ? Colors.amber.withOpacity(0.18)
-                    : Colors.amber.withOpacity(0.22),
+                    ? const Color.fromRGBO(249, 87, 56, 1).withOpacity(0.18)
+                    : const Color.fromRGBO(249, 87, 56, 1).withOpacity(0.22),
                 width: 1.2,
               ),
             ),
@@ -80,8 +80,8 @@ class _RootScaffoldState extends State<RootScaffold> {
                         decoration: _currentIndex == i
                             ? BoxDecoration(
                                 color: theme.brightness == Brightness.dark
-                                    ? Colors.amber[700]?.withOpacity(0.18)
-                                    : Colors.amber[200]?.withOpacity(0.38),
+                                    ? const Color.fromRGBO(249, 87, 56, 1).withOpacity(0.35)
+                                    : const Color.fromRGBO(249, 87, 56, 1).withOpacity(0.65),
                                 borderRadius: BorderRadius.circular(50),
                               )
                             : null,
@@ -95,8 +95,8 @@ class _RootScaffoldState extends State<RootScaffold> {
                           ][i],
                           color: _currentIndex == i
                               ? (theme.brightness == Brightness.dark
-                                  ? Colors.amber[200]
-                                  : Colors.amber[800])
+                                  ? Colors.white
+                                  : Colors.black)
                               : theme.iconTheme.color,
                           size: 26,
                         ),

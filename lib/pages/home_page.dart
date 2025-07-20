@@ -5,8 +5,8 @@ import 'add_page.dart';
 import '../widgets/expense_item.dart';
 import '../providers/transaction_provider.dart';
 import '../models/transaction.dart';
+import '../data/accounts_data.dart';
 import 'settings_page.dart';
-import '../providers/accounts_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,11 +31,11 @@ class _HomePageState extends State<HomePage>
   Color _getTypeColor(TransactionType type) {
     switch (type) {
       case TransactionType.income:
-        return Colors.green;
+        return const Color.fromRGBO(179, 255, 179, 1); // green
       case TransactionType.expense:
-        return Colors.red;
+        return const Color.fromRGBO(139, 30, 63, 1); // red
       case TransactionType.transfer:
-        return Colors.blue;
+        return const Color.fromRGBO(255, 207, 153, 1); // yellow
     }
   }
 
@@ -171,7 +171,11 @@ class _HomePageState extends State<HomePage>
       body: Consumer2<TransactionProvider, AccountsData>(
         builder: (context, transactionProvider, accountsData, child) {
           final transactions = transactionProvider.transactions;
-          if (transactions.isEmpty) {
+          // Sort transactions by date (most recent first)
+          final sortedTransactions = List.from(transactions)
+            ..sort((a, b) => b.date.compareTo(a.date));
+          
+          if (sortedTransactions.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -201,40 +205,71 @@ class _HomePageState extends State<HomePage>
               ),
             );
           }
+
+          // Group transactions by date
+          Map<String, List<Transaction>> groupedTransactions = {};
+          for (var transaction in sortedTransactions) {
+            String dateKey = _formatDate(transaction.date);
+            if (!groupedTransactions.containsKey(dateKey)) {
+              groupedTransactions[dateKey] = [];
+            }
+            groupedTransactions[dateKey]!.add(transaction);
+          }
+
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: transactions.length,
+            itemCount: groupedTransactions.length,
             itemBuilder: (context, index) {
-              final transaction = transactions[index];
-              String accountLabel = '';
-              if (transaction.type == TransactionType.transfer) {
-                final fromAcc = accountsData.accounts.firstWhere(
-                  (a) => a.id == transaction.fromAccountId,
-                  orElse: () => null,
-                );
-                final toAcc = accountsData.accounts.firstWhere(
-                  (a) => a.id == transaction.toAccountId,
-                  orElse: () => null,
-                );
-                accountLabel = fromAcc != null && toAcc != null
-                  ? '${fromAcc.name} → ${toAcc.name}'
-                  : (transaction.fromAccount ?? '') + ' → ' + (transaction.toAccount ?? '');
-              } else {
-                final acc = accountsData.accounts.firstWhere(
-                  (a) => a.id == transaction.accountId,
-                  orElse: () => null,
-                );
-                accountLabel = acc?.name ?? transaction.account ?? '';
-              }
-              return GestureDetector(
-                onTap: () => _showEditTransactionDialog(context, transaction),
-                child: ExpenseItem(
-                  amount: transaction.amount,
-                  category: transaction.category ?? accountLabel,
-                  date: _formatDate(transaction.date),
-                  type: _getTypeString(transaction.type),
-                  typeColor: _getTypeColor(transaction.type),
-                ),
+              String dateKey = groupedTransactions.keys.elementAt(index);
+              List<Transaction> dayTransactions = groupedTransactions[dateKey]!;
+              
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Date header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Text(
+                      dateKey,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                      ),
+                    ),
+                  ),
+                  // Transactions for this date
+                  ...dayTransactions.map((transaction) {
+                    String accountLabel = '';
+                    if (transaction.type == TransactionType.transfer) {
+                      final fromAccList = accountsData.accounts.where((a) => a.id == transaction.fromAccountId);
+                      final toAccList = accountsData.accounts.where((a) => a.id == transaction.toAccountId);
+                      final fromAcc = fromAccList.isNotEmpty ? fromAccList.first : null;
+                      final toAcc = toAccList.isNotEmpty ? toAccList.first : null;
+                      if (fromAcc != null && toAcc != null) {
+                        accountLabel = '${fromAcc.name} → ${toAcc.name}';
+                      } else {
+                        accountLabel = (transaction.fromAccount ?? '') + ' → ' + (transaction.toAccount ?? '');
+                      }
+                    } else {
+                      final accList = accountsData.accounts.where((a) => a.id == transaction.accountId);
+                      final acc = accList.isNotEmpty ? accList.first : null;
+                      accountLabel = acc != null ? acc.name : (transaction.account ?? '');
+                    }
+                    
+                    return GestureDetector(
+                      onTap: () => _showEditTransactionDialog(context, transaction),
+                      child: ExpenseItem(
+                        amount: transaction.amount,
+                        category: transaction.category ?? accountLabel,
+                        categoryIcon: transaction.categoryIcon,
+                        date: '', // Empty date since we're grouping by date
+                        type: _getTypeString(transaction.type),
+                        typeColor: _getTypeColor(transaction.type),
+                      ),
+                    );
+                  }).toList(),
+                ],
               );
             },
           );
@@ -252,7 +287,7 @@ class _HomePageState extends State<HomePage>
               ),
             );
           },
-          backgroundColor: Colors.orange,
+          backgroundColor: const Color.fromRGBO(249, 87, 56, 1),
           icon: const Icon(LucideIcons.plus, color: Colors.white),
           label: const Text(
             'Add',

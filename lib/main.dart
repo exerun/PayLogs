@@ -12,7 +12,30 @@ import 'package:flutter/services.dart';
 import 'widgets/screenshot_import_sheet.dart';
 import 'widgets/responsive_layout.dart';
 
-void main() {
+// Import for desktop SQLite support
+import 'package:flutter/foundation.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize SQLite for desktop platforms
+  if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.linux || 
+                  defaultTargetPlatform == TargetPlatform.windows || 
+                  defaultTargetPlatform == TargetPlatform.macOS)) {
+    try {
+      // Initialize FFI
+      sqfliteFfiInit();
+      // Change the default factory
+      databaseFactory = databaseFactoryFfi;
+      print('SQLite FFI initialized successfully for desktop platform');
+    } catch (e) {
+      print('Error initializing SQLite FFI: $e');
+      // Fallback to regular sqflite if FFI fails
+      print('Falling back to regular sqflite');
+    }
+  }
+  
   runApp(const PayLogsApp());
 }
 
@@ -35,9 +58,13 @@ class PayLogsApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: 'PayLogs',
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange, brightness: Brightness.light),
+              colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromRGBO(249, 87, 56, 1), brightness: Brightness.light).copyWith(
+                background: const Color(0xFFF3E9DC),
+              ),
               useMaterial3: true,
               textTheme: GoogleFonts.jetBrainsMonoTextTheme(),
+              scaffoldBackgroundColor: const Color(0xFFF3E9DC),
+              canvasColor: const Color(0xFFF3E9DC),
             ),
             darkTheme: ThemeData(
               colorScheme: _customDarkScheme(),
@@ -48,8 +75,8 @@ class PayLogsApp extends StatelessWidget {
                   displayColor: Colors.white,
                 ),
               ),
-              scaffoldBackgroundColor: Colors.black,
-              canvasColor: Colors.black,
+              scaffoldBackgroundColor: const Color.fromRGBO(30, 31, 30, 1),
+              canvasColor: const Color.fromRGBO(30, 31, 30, 1),
             ),
             themeMode: themeNotifier.themeMode,
             home: const ResponsiveLayout(
@@ -64,13 +91,13 @@ class PayLogsApp extends StatelessWidget {
 
 ColorScheme _customDarkScheme() {
   return ColorScheme.fromSeed(
-    seedColor: Colors.deepOrange.shade700,
+    seedColor: const Color.fromRGBO(249, 87, 56, 1),
     brightness: Brightness.dark,
   ).copyWith(
-    background: Colors.black,
+    background: const Color.fromRGBO(30, 31, 30, 1),
     surface: Colors.grey[900],
-    primary: Colors.deepOrange.shade400,
-    secondary: Colors.amber.shade700,
+    primary: const Color.fromRGBO(249, 87, 56, 1),
+    secondary: const Color.fromRGBO(249, 87, 56, 1),
     onBackground: Colors.white,
     onSurface: Colors.white,
     onPrimary: Colors.white,

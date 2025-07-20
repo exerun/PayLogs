@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'ocr_demo_page.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class ScreenshotsPage extends StatefulWidget {
@@ -140,6 +143,20 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
     );
   }
 
+  Future<void> _pickImageAndRunOcr() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => OcrDemoPage(imageFile: file),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Important for AutomaticKeepAliveClientMixin
@@ -174,21 +191,10 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
             ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 80.0),
-        child: FloatingActionButton.extended(
-          onPressed: _importScreenshot,
-          backgroundColor: Colors.orange,
-          icon: const Icon(LucideIcons.plus, color: Colors.white),
-          label: const Text(
-            'Add',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32),
-          ),
-          elevation: 6,
+        child: FloatingActionButton(
+          onPressed: _pickImageAndRunOcr,
+          backgroundColor: const Color.fromRGBO(249, 87, 56, 1),
+          child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

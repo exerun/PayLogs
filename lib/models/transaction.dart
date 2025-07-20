@@ -9,6 +9,7 @@ class Transaction {
   final double amount;
   final String? notes;
   final String? category;
+  final String? categoryIcon; // New field for category icon
   final int? accountId;
   final int? fromAccountId;
   final int? toAccountId;
@@ -23,6 +24,7 @@ class Transaction {
     required this.amount,
     this.notes,
     this.category,
+    this.categoryIcon,
     this.accountId,
     this.fromAccountId,
     this.toAccountId,
@@ -38,6 +40,7 @@ class Transaction {
     double? amount,
     String? notes,
     String? category,
+    String? categoryIcon,
     int? accountId,
     int? fromAccountId,
     int? toAccountId,
@@ -52,6 +55,7 @@ class Transaction {
       amount: amount ?? this.amount,
       notes: notes ?? this.notes,
       category: category ?? this.category,
+      categoryIcon: categoryIcon ?? this.categoryIcon,
       accountId: accountId ?? this.accountId,
       fromAccountId: fromAccountId ?? this.fromAccountId,
       toAccountId: toAccountId ?? this.toAccountId,
@@ -69,6 +73,7 @@ class Transaction {
       'amount': amount,
       'notes': notes,
       'category': category,
+      'categoryIcon': categoryIcon,
       'accountId': accountId,
       'fromAccountId': fromAccountId,
       'toAccountId': toAccountId,
@@ -81,22 +86,30 @@ class Transaction {
   }
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
-    return Transaction(
-      id: json['id'],
-      amount: json['amount'].toDouble(),
-      notes: json['notes'],
-      category: json['category'],
-      accountId: json['accountId'],
-      fromAccountId: json['fromAccountId'],
-      toAccountId: json['toAccountId'],
-      account: json['account'],
-      fromAccount: json['fromAccount'],
-      toAccount: json['toAccount'],
-      date: DateTime.parse(json['date']),
-      type: TransactionType.values.firstWhere(
-        (e) => e.name == json['type'],
-      ),
-    );
+    try {
+      print('Parsing transaction: ${json['id']} - ${json['amount']} - ${json['type']}');
+      return Transaction(
+        id: json['id'],
+        amount: json['amount'].toDouble(),
+        notes: json['notes'],
+        category: json['category'],
+        categoryIcon: json['categoryIcon'],
+        accountId: json['accountId'],
+        fromAccountId: json['fromAccountId'],
+        toAccountId: json['toAccountId'],
+        account: json['account'],
+        fromAccount: json['fromAccount'],
+        toAccount: json['toAccount'],
+        date: DateTime.parse(json['date']),
+        type: TransactionType.values.firstWhere(
+          (e) => e.name == json['type'],
+        ),
+      );
+    } catch (e) {
+      print('Error parsing transaction from JSON: $e');
+      print('JSON data: $json');
+      rethrow;
+    }
   }
 
   @override

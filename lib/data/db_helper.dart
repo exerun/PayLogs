@@ -16,13 +16,19 @@ class DBHelper {
   }
 
   Future<Database> _initDb() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'paylogs.db');
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate,
-    );
+    try {
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, 'paylogs.db');
+      print('Database path: $path'); // Debug log
+      return await openDatabase(
+        path,
+        version: 1,
+        onCreate: _onCreate,
+      );
+    } catch (e) {
+      print('Error initializing database: $e');
+      rethrow;
+    }
   }
 
   Future _onCreate(Database db, int version) async {
@@ -39,6 +45,7 @@ class DBHelper {
         amount REAL NOT NULL,
         notes TEXT,
         category TEXT,
+        categoryIcon TEXT,
         accountId INTEGER,
         fromAccountId INTEGER,
         toAccountId INTEGER,
@@ -69,8 +76,17 @@ class DBHelper {
   }
 
   Future<int> updateAccount(Map<String, dynamic> account) async {
-    final dbClient = await db;
-    return await dbClient.update('accounts', account, where: 'id = ?', whereArgs: [account['id']]);
+    try {
+      final dbClient = await db;
+      final result = await dbClient.update('accounts', account, where: 'id = ?', whereArgs: [account['id']]);
+      if (result == 0) {
+        throw Exception('No account found with ID ${account['id']}');
+      }
+      return result;
+    } catch (e) {
+      print('Error updating account in database: $e');
+      rethrow;
+    }
   }
 
   Future<int> deleteAccount(int id) async {
@@ -85,8 +101,15 @@ class DBHelper {
   }
 
   Future<List<Map<String, dynamic>>> getTransactions() async {
-    final dbClient = await db;
-    return await dbClient.query('transactions', orderBy: 'date DESC');
+    try {
+      final dbClient = await db;
+      final result = await dbClient.query('transactions', orderBy: 'date DESC');
+      print('DBHelper: Retrieved ${result.length} transactions from database');
+      return result;
+    } catch (e) {
+      print('DBHelper: Error getting transactions: $e');
+      rethrow;
+    }
   }
 
   Future<int> updateTransaction(Map<String, dynamic> txn) async {

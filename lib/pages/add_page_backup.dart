@@ -99,7 +99,7 @@ class _AddPageState extends State<AddPage>
     );
 
     // Add transaction to provider
-    await context.read<TransactionProvider>().addTransaction(transaction);
+    await context.read<TransactionProvider>().addTransaction(transaction, context);
 
     // Show success message
     _showSnackBar('Transaction saved successfully!');
@@ -181,7 +181,7 @@ class _AddPageState extends State<AddPage>
           },
           icon: const Icon(
             Icons.close,
-            color: Colors.orange,
+            color: Color.fromRGBO(255, 51, 0, 1),
             size: 24,
           ),
         ),
@@ -190,7 +190,7 @@ class _AddPageState extends State<AddPage>
             onPressed: _isSaving ? null : () async { await _saveTransaction(); },
             icon: const Icon(
               Icons.check,
-              color: Colors.orange,
+              color: Color.fromRGBO(255, 51, 0, 1),
               size: 24,
             ),
           ),
@@ -223,7 +223,7 @@ class _AddPageState extends State<AddPage>
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.orange : Colors.transparent,
+                          color: isSelected ? const Color.fromRGBO(255, 51, 0, 1) : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(

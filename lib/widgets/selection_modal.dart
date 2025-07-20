@@ -16,10 +16,13 @@ class SelectionModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -30,7 +33,7 @@ class SelectionModal extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: isDark ? Colors.grey[600] : Colors.grey[300],
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -40,9 +43,10 @@ class SelectionModal extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black,
               ),
             ),
           ),
@@ -72,10 +76,14 @@ class SelectionModal extends StatelessWidget {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.orange : Colors.grey[50],
+                      color: isSelected 
+                          ? const Color.fromRGBO(255, 51, 0, 1) 
+                          : (isDark ? const Color(0xFF3A3A3A) : Colors.grey[50]),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected ? Colors.orange : Colors.grey[300]!,
+                        color: isSelected 
+                            ? const Color.fromRGBO(255, 51, 0, 1) 
+                            : (isDark ? Colors.grey[600]! : Colors.grey[300]!),
                         width: 2,
                       ),
                     ),
@@ -85,7 +93,9 @@ class SelectionModal extends StatelessWidget {
                         Icon(
                           option.icon,
                           size: 32,
-                          color: isSelected ? Colors.white : Colors.grey[700],
+                          color: isSelected 
+                              ? Colors.white 
+                              : (isDark ? Colors.white : Colors.grey[700]),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -94,7 +104,9 @@ class SelectionModal extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isSelected ? Colors.white : Colors.grey[700],
+                            color: isSelected 
+                                ? Colors.white 
+                                : (isDark ? Colors.white : Colors.grey[700]),
                           ),
                         ),
                       ],

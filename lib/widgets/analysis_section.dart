@@ -26,10 +26,11 @@ class AnalysisSection extends StatelessWidget {
     if (total == 0) return [];
 
     final colors = [
-      Colors.red,
+      const Color.fromRGBO(139, 30, 63, 1), // red
       Colors.blue,
-      Colors.green,
-      Colors.orange,
+      const Color.fromRGBO(179, 255, 179, 1), // green
+      const Color.fromRGBO(242, 84, 45, 1), // orange
+      const Color.fromRGBO(255, 207, 153, 1), // yellow
       Colors.purple,
       Colors.teal,
       Colors.pink,
@@ -121,7 +122,7 @@ class AnalysisSection extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red,
+                          color: Color.fromRGBO(139, 30, 63, 1), // red
                         ),
                       ),
                     ],
@@ -210,7 +211,7 @@ class AnalysisSection extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.red,
+                            color: Color.fromRGBO(139, 30, 63, 1), // red
                           ),
                         ),
                       ],

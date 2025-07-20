@@ -52,13 +52,26 @@ class _AccountsPageState extends State<AccountsPage>
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 final name = nameController.text.trim();
                 final balance = double.tryParse(balanceController.text) ?? 0.0;
                 
                 if (name.isNotEmpty) {
-                  context.read<AccountsData>().addAccount(name, balance);
-                  Navigator.of(context).pop();
+                  try {
+                    print('Attempting to add account from UI: $name');
+                    await context.read<AccountsData>().addAccount(name, balance);
+                    print('Account added successfully from UI');
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    print('Error adding account from UI: $e');
+                    // Show error to user
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error adding account: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
                 }
               },
               child: const Text('Add Account'),
@@ -246,7 +259,7 @@ class _AccountsPageState extends State<AccountsPage>
         padding: const EdgeInsets.only(bottom: 80.0),
         child: FloatingActionButton.extended(
           onPressed: () => _showAddAccountDialog(context),
-          backgroundColor: Colors.orange,
+          backgroundColor: const Color.fromRGBO(249, 87, 56, 1),
           icon: const Icon(LucideIcons.plus, color: Colors.white),
           label: const Text(
             'Add',

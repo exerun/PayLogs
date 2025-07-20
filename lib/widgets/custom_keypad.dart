@@ -13,8 +13,11 @@ class CustomKeypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Card(
-      color: const Color(0xFFF9F9F9),
+      color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF9F9F9),
       elevation: 6,
       margin: const EdgeInsets.all(0),
       shape: RoundedRectangleBorder(
@@ -33,7 +36,7 @@ class CustomKeypad extends StatelessWidget {
                 width: buttonWidth,
                 height: buttonHeight,
                 child: Material(
-                  color: const Color(0xFFF3F3F3),
+                  color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF3F3F3),
                   borderRadius: BorderRadius.circular(22),
                   child: InkWell(
                     onTap: () => onDigitPressed(digit),
@@ -41,11 +44,11 @@ class CustomKeypad extends StatelessWidget {
                     child: Center(
                       child: Text(
                         digit,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'JetBrains Mono',
-                          color: Color(0xFF444444),
+                          color: isDark ? Colors.white : const Color(0xFF444444),
                         ),
                       ),
                     ),
@@ -59,17 +62,15 @@ class CustomKeypad extends StatelessWidget {
                 width: buttonWidth,
                 height: buttonHeight,
                 child: Material(
-                  color: const Color(0xFFF3F3F3),
+                  color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF3F3F3),
                   borderRadius: BorderRadius.circular(22),
                   child: InkWell(
                     onTap: onBackspace,
                     borderRadius: BorderRadius.circular(22),
-                    child: const Center(
-                      child: Icon(
-                        LucideIcons.delete,
-                        size: 28,
-                        color: Color(0xFF444444),
-                      ),
+                    child: Icon(
+                      LucideIcons.delete,
+                      size: 28,
+                      color: isDark ? Colors.white : const Color(0xFF444444),
                     ),
                   ),
                 ),

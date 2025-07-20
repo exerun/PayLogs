@@ -35,35 +35,54 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
   Future<void> _saveTransaction() async {
     if (_isSaving) return;
     setState(() => _isSaving = true);
-    if (_selectedAccount == null) {
+    
+    try {
+      if (_selectedAccount == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select an account'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      
+      final accountsData = Provider.of<AccountsData>(context, listen: false);
+      final acc = accountsData.accounts.firstWhere(
+        (a) => a.name == _selectedAccount,
+        orElse: () => throw Exception('Account not found'),
+      );
+      
+      final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
+      final transaction = Transaction(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        amount: 0.0, // Placeholder - will be detected later
+        notes: _noteController.text.isNotEmpty ? _noteController.text : 'Screenshot import',
+        category: _selectedCategory,
+        accountId: acc.id,
+        account: _selectedAccount,
+        date: _currentDateTime,
+        type: TransactionType.expense,
+      );
+      
+      await transactionProvider.addTransaction(transaction, context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select an account'),
+          content: Text('Screenshot saved successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
       setState(() => _isSaving = false);
-      return;
     }
-    final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
-    final transaction = Transaction(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      amount: 0.0, // Placeholder - will be detected later
-      notes: _noteController.text.isNotEmpty ? _noteController.text : 'Screenshot import',
-      category: _selectedCategory,
-      account: _selectedAccount,
-      date: _currentDateTime,
-      type: TransactionType.expense,
-    );
-    await transactionProvider.addTransaction(transaction, context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Screenshot saved successfully!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    setState(() => _isSaving = false);
-    Navigator.pop(context);
   }
 
   @override

@@ -47,17 +47,36 @@ class AccountsData extends ChangeNotifier {
   }
 
   Future<void> addAccount(String name, double balance) async {
-    final id = await _dbHelper.insertAccount({'name': name, 'balance': balance});
-    _accounts.add(Account(id: id, name: name, balance: balance));
-    notifyListeners();
+    try {
+      print('Adding account: $name with balance: $balance');
+      final id = await _dbHelper.insertAccount({'name': name, 'balance': balance});
+      print('Account inserted with ID: $id');
+      _accounts.add(Account(id: id, name: name, balance: balance));
+      print('Account added to memory. Total accounts: ${_accounts.length}');
+      notifyListeners();
+    } catch (e) {
+      print('Error adding account: $e');
+      rethrow;
+    }
   }
 
   Future<void> updateAccount(Account account) async {
-    await _dbHelper.updateAccount(account.toJson());
-    final idx = _accounts.indexWhere((a) => a.id == account.id);
-    if (idx != -1) {
-      _accounts[idx] = account;
-      notifyListeners();
+    try {
+      if (account.id == null) {
+        throw Exception('Cannot update account without ID');
+      }
+      
+      await _dbHelper.updateAccount(account.toJson());
+      final idx = _accounts.indexWhere((a) => a.id == account.id);
+      if (idx != -1) {
+        _accounts[idx] = account;
+        notifyListeners();
+      } else {
+        throw Exception('Account not found in memory');
+      }
+    } catch (e) {
+      print('Error updating account: $e');
+      rethrow;
     }
   }
 
