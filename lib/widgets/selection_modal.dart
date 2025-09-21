@@ -18,7 +18,7 @@ class SelectionModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
@@ -37,7 +37,7 @@ class SelectionModal extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           // Title
           Padding(
             padding: const EdgeInsets.all(20),
@@ -50,7 +50,7 @@ class SelectionModal extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Grid of options
           Flexible(
             child: GridView.builder(
@@ -66,7 +66,7 @@ class SelectionModal extends StatelessWidget {
               itemBuilder: (context, index) {
                 final option = options[index];
                 final isSelected = selectedValue == option.value;
-                
+
                 return GestureDetector(
                   onTap: () {
                     onSelectionChanged(option.value);
@@ -76,13 +76,15 @@ class SelectionModal extends StatelessWidget {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isSelected 
-                          ? const Color.fromRGBO(255, 51, 0, 1) 
-                          : (isDark ? const Color(0xFF3A3A3A) : Colors.grey[50]),
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : (isDark
+                                ? const Color(0xFF3A3A3A)
+                                : Colors.grey[50]),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected 
-                            ? const Color.fromRGBO(255, 51, 0, 1) 
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary
                             : (isDark ? Colors.grey[600]! : Colors.grey[300]!),
                         width: 2,
                       ),
@@ -92,9 +94,9 @@ class SelectionModal extends StatelessWidget {
                       children: [
                         Icon(
                           option.icon,
-                          size: 32,
-                          color: isSelected 
-                              ? Colors.white 
+                          size: 24,
+                          color: isSelected
+                              ? Colors.white
                               : (isDark ? Colors.white : Colors.grey[700]),
                         ),
                         const SizedBox(height: 8),
@@ -104,8 +106,8 @@ class SelectionModal extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isSelected 
-                                ? Colors.white 
+                            color: isSelected
+                                ? Colors.white
                                 : (isDark ? Colors.white : Colors.grey[700]),
                           ),
                         ),
@@ -116,7 +118,7 @@ class SelectionModal extends StatelessWidget {
               },
             ),
           ),
-          
+
           const SizedBox(height: 20),
         ],
       ),
@@ -134,4 +136,4 @@ class SelectionOption {
     required this.label,
     required this.icon,
   });
-} 
+}

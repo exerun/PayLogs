@@ -1,25 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'home_page.dart';
 import 'manage_page.dart';
 import 'accounts_page.dart';
-import 'screenshots_page.dart';
+import 'settings_page.dart';
+import 'dashboard_page.dart';
 
-class GroupsPage extends StatelessWidget {
-  const GroupsPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Text(
-          'Under Construction',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey),
-        ),
-      ),
-    );
-  }
-}
+
 
 class RootScaffold extends StatefulWidget {
   const RootScaffold({super.key});
@@ -29,85 +17,69 @@ class RootScaffold extends StatefulWidget {
 }
 
 class _RootScaffoldState extends State<RootScaffold> {
-  int _currentIndex = 0;
+  final PersistentTabController _controller = PersistentTabController(initialIndex: 0);
 
-  final _pages = const [
-    HomePage(),
-    ManagePage(),
-    GroupsPage(),
-    AccountsPage(),
-    ScreenshotsPage(),
-  ];
+  List<Widget> _buildScreens() {
+    return [
+      const HomePage(),
+      const ManagePage(),
+      const DashboardPage(),
+      const AccountsPage(),
+      const SettingsPage(),
+    ];
+  }
+
+  List<PersistentBottomNavBarItem> _navBarsItems() {
+    return [
+      PersistentBottomNavBarItem(
+        icon: const Icon(LucideIcons.home),
+        title: ("Home"),
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: Colors.grey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(LucideIcons.pieChart),
+        title: ("Manage"),
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: Colors.grey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(LucideIcons.arrowUpRightFromCircle),
+        title: ("Dashboard"),
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: Colors.grey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(LucideIcons.wallet),
+        title: ("Accounts"),
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: Colors.grey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(LucideIcons.settings),
+        title: ("Settings"),
+        activeColorPrimary: Theme.of(context).colorScheme.primary,
+        inactiveColorPrimary: Colors.grey,
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.white,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
+    return PersistentTabView(
+      context,
+      controller: _controller,
+      screens: _buildScreens(),
+      items: _navBarsItems(),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      handleAndroidBackButtonPress: true,
+      resizeToAvoidBottomInset: true,
+      stateManagement: true,
+      decoration: NavBarDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        colorBehindNavBar: Theme.of(context).scaffoldBackgroundColor,
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor.withOpacity(theme.brightness == Brightness.dark ? 0.92 : 0.98),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: theme.brightness == Brightness.dark
-                    ? const Color.fromRGBO(249, 87, 56, 1).withOpacity(0.18)
-                    : const Color.fromRGBO(249, 87, 56, 1).withOpacity(0.22),
-                width: 1.2,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  for (int i = 0; i < 5; i++)
-                    GestureDetector(
-                      onTap: () => setState(() => _currentIndex = i),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeInOut,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: _currentIndex == i
-                            ? BoxDecoration(
-                                color: theme.brightness == Brightness.dark
-                                    ? const Color.fromRGBO(249, 87, 56, 1).withOpacity(0.35)
-                                    : const Color.fromRGBO(249, 87, 56, 1).withOpacity(0.65),
-                                borderRadius: BorderRadius.circular(50),
-                              )
-                            : null,
-                        child: Icon(
-                          [
-                            LucideIcons.home,
-                            LucideIcons.settings,
-                            LucideIcons.users,
-                            LucideIcons.wallet,
-                            LucideIcons.image,
-                          ][i],
-                          color: _currentIndex == i
-                              ? (theme.brightness == Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black)
-                              : theme.iconTheme.color,
-                          size: 26,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      navBarStyle: NavBarStyle.style1,
     );
   }
-} 
+}

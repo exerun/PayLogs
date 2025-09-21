@@ -10,10 +10,7 @@ import '../providers/budget_provider.dart';
 class ScreenshotImportSheet extends StatefulWidget {
   final String imagePath;
 
-  const ScreenshotImportSheet({
-    super.key,
-    required this.imagePath,
-  });
+  const ScreenshotImportSheet({super.key, required this.imagePath});
 
   @override
   State<ScreenshotImportSheet> createState() => _ScreenshotImportSheetState();
@@ -35,7 +32,7 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
   Future<void> _saveTransaction() async {
     if (_isSaving) return;
     setState(() => _isSaving = true);
-    
+
     try {
       if (_selectedAccount == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -46,25 +43,30 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
         );
         return;
       }
-      
+
       final accountsData = Provider.of<AccountsData>(context, listen: false);
       final acc = accountsData.accounts.firstWhere(
         (a) => a.name == _selectedAccount,
         orElse: () => throw Exception('Account not found'),
       );
-      
-      final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
+
+      final transactionProvider = Provider.of<TransactionProvider>(
+        context,
+        listen: false,
+      );
       final transaction = Transaction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         amount: 0.0, // Placeholder - will be detected later
-        notes: _noteController.text.isNotEmpty ? _noteController.text : 'Screenshot import',
+        notes: _noteController.text.isNotEmpty
+            ? _noteController.text
+            : 'Screenshot import',
         category: _selectedCategory,
         accountId: acc.id,
         account: _selectedAccount,
         date: _currentDateTime,
         type: TransactionType.expense,
       );
-      
+
       await transactionProvider.addTransaction(transaction, context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -170,7 +172,7 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.indigo),
+                        borderSide: const BorderSide(color: Color(0xFFD2B48C)),
                       ),
                       filled: true,
                       fillColor: Colors.grey[50],
@@ -196,7 +198,7 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.indigo),
+                        borderSide: const BorderSide(color: Color(0xFFD2B48C)),
                       ),
                       filled: true,
                       fillColor: Colors.grey[50],
@@ -236,7 +238,7 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.indigo),
+                        borderSide: const BorderSide(color: Color(0xFFD2B48C)),
                       ),
                       filled: true,
                       fillColor: Colors.grey[50],
@@ -331,9 +333,13 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _isSaving ? null : () async { await _saveTransaction(); },
+                          onPressed: _isSaving
+                              ? null
+                              : () async {
+                                  await _saveTransaction();
+                                },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.indigo,
+                            backgroundColor: const Color(0xFFD2B48C),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -356,4 +362,4 @@ class _ScreenshotImportSheetState extends State<ScreenshotImportSheet> {
       ),
     );
   }
-} 
+}

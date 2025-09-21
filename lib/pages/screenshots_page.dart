@@ -77,9 +77,9 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
                 ),
                 child: const Center(
                   child: Icon(
-                    LucideIcons.image,
-                    size: 48,
+                    LucideIcons.imageOff,
                     color: Colors.grey,
+                    size: 36,
                   ),
                 ),
               ),
@@ -104,8 +104,18 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
 
   String _formatTimestamp(DateTime timestamp) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[timestamp.month - 1]} ${timestamp.day}, ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
@@ -117,7 +127,7 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
         children: [
           Icon(
             LucideIcons.monitor,
-            size: 64,
+            size: 48,
             color: Theme.of(context).iconTheme.color,
           ),
           const SizedBox(height: 16),
@@ -125,7 +135,7 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
             'No screenshots yet',
             style: TextStyle(
               fontSize: 18,
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -134,7 +144,7 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
             'Tap the + button to import your first screenshot',
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
           ),
@@ -150,9 +160,7 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
       final file = File(pickedFile.path);
       if (!mounted) return;
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => OcrDemoPage(imageFile: file),
-        ),
+        MaterialPageRoute(builder: (context) => OcrDemoPage(imageFile: file)),
       );
     }
   }
@@ -163,18 +171,19 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
 
     return Scaffold(
       key: const PageStorageKey('screenshots'),
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text(
-          'Screenshots',
+        title: Text(
+          'PayLogs',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            fontSize: 18,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
       body: _screenshots.isEmpty
           ? _buildEmptyState()
@@ -190,14 +199,20 @@ class _ScreenshotsPageState extends State<ScreenshotsPage>
               itemBuilder: (context, index) => _buildScreenshotTile(index),
             ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80.0),
+        padding: const EdgeInsets.only(bottom: 90.0),
         child: FloatingActionButton(
           onPressed: _pickImageAndRunOcr,
-          backgroundColor: const Color.fromRGBO(249, 87, 56, 1),
-          child: const Icon(Icons.add, color: Colors.white),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          child: Icon(
+            Icons.add,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black
+                : Colors.white,
+            size: 18,
+          ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
-} 
+}

@@ -10,31 +10,37 @@ class AnalysisSection extends StatelessWidget {
 
   Map<String, double> _calculateCategoryTotals(List<Transaction> transactions) {
     final Map<String, double> categoryTotals = {};
-    
+
     for (final transaction in transactions) {
-      if (transaction.type == TransactionType.expense && transaction.category != null) {
-        categoryTotals[transaction.category!] = 
+      if (transaction.type == TransactionType.expense &&
+          transaction.category != null) {
+        categoryTotals[transaction.category!] =
             (categoryTotals[transaction.category!] ?? 0) + transaction.amount;
       }
     }
-    
+
     return categoryTotals;
   }
 
-  List<PieChartSectionData> _createPieChartSections(Map<String, double> categoryTotals) {
-    final total = categoryTotals.values.fold(0.0, (sum, amount) => sum + amount);
+  List<PieChartSectionData> _createPieChartSections(
+    Map<String, double> categoryTotals,
+  ) {
+    final total = categoryTotals.values.fold(
+      0.0,
+      (sum, amount) => sum + amount,
+    );
     if (total == 0) return [];
 
     final colors = [
       const Color.fromRGBO(139, 30, 63, 1), // red
-      Colors.blue,
+      const Color(0xFFD2B48C),
       const Color.fromRGBO(179, 255, 179, 1), // green
       const Color.fromRGBO(242, 84, 45, 1), // orange
       const Color.fromRGBO(255, 207, 153, 1), // yellow
       Colors.purple,
       Colors.teal,
       Colors.pink,
-      Colors.indigo,
+      const Color(0xFFD2B48C),
     ];
 
     int colorIndex = 0;
@@ -42,7 +48,7 @@ class AnalysisSection extends StatelessWidget {
       final percentage = (entry.value / total) * 100;
       final color = colors[colorIndex % colors.length];
       colorIndex++;
-      
+
       return PieChartSectionData(
         color: color,
         value: entry.value,
@@ -63,33 +69,26 @@ class AnalysisSection extends StatelessWidget {
       builder: (context, transactionProvider, child) {
         final transactions = transactionProvider.transactions;
         final categoryTotals = _calculateCategoryTotals(transactions);
-        final totalExpense = categoryTotals.values.fold(0.0, (sum, amount) => sum + amount);
+        final totalExpense = categoryTotals.values.fold(
+          0.0,
+          (sum, amount) => sum + amount,
+        );
 
         if (categoryTotals.isEmpty) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  LucideIcons.pieChart,
-                  size: 64,
-                  color: Colors.grey,
-                ),
+                Icon(LucideIcons.pieChart, size: 48, color: Colors.grey),
                 SizedBox(height: 16),
                 Text(
                   'No expense data available',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
                 ),
                 SizedBox(height: 8),
                 Text(
                   'Add some expenses to see your analysis',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],
             ),
@@ -129,9 +128,9 @@ class AnalysisSection extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Pie Chart
               Card(
                 elevation: 2,
@@ -162,19 +161,16 @@ class AnalysisSection extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Category Breakdown
               const Text(
                 'Category Breakdown',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              
+
               ...categoryTotals.entries.map((entry) {
                 final percentage = (entry.value / totalExpense) * 100;
                 return Card(
@@ -225,4 +221,4 @@ class AnalysisSection extends StatelessWidget {
       },
     );
   }
-} 
+}

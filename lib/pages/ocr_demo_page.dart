@@ -5,7 +5,7 @@ import '../data/ocr_service.dart';
 
 class OcrDemoPage extends StatefulWidget {
   final File imageFile;
-  const OcrDemoPage({Key? key, required this.imageFile}) : super(key: key);
+  const OcrDemoPage({super.key, required this.imageFile});
 
   @override
   State<OcrDemoPage> createState() => _OcrDemoPageState();

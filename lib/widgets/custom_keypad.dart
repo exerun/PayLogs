@@ -15,20 +15,19 @@ class CustomKeypad extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Card(
       color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF9F9F9),
       elevation: 6,
       margin: const EdgeInsets.all(0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final buttonSpacing = 14.0;
-            final buttonHeight = (constraints.maxHeight - buttonSpacing * 3) / 4;
+            final buttonHeight =
+                (constraints.maxHeight - buttonSpacing * 3) / 4;
             final buttonWidth = (constraints.maxWidth - buttonSpacing * 2) / 3;
 
             Widget buildKey(String digit) {
@@ -36,7 +35,9 @@ class CustomKeypad extends StatelessWidget {
                 width: buttonWidth,
                 height: buttonHeight,
                 child: Material(
-                  color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF3F3F3),
+                  color: isDark
+                      ? const Color(0xFF3A3A3A)
+                      : const Color(0xFFF3F3F3),
                   borderRadius: BorderRadius.circular(22),
                   child: InkWell(
                     onTap: () => onDigitPressed(digit),
@@ -48,7 +49,9 @@ class CustomKeypad extends StatelessWidget {
                           fontSize: 28,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'JetBrains Mono',
-                          color: isDark ? Colors.white : const Color(0xFF444444),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF444444),
                         ),
                       ),
                     ),
@@ -62,14 +65,16 @@ class CustomKeypad extends StatelessWidget {
                 width: buttonWidth,
                 height: buttonHeight,
                 child: Material(
-                  color: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF3F3F3),
+                  color: isDark
+                      ? const Color(0xFF3A3A3A)
+                      : const Color(0xFFF3F3F3),
                   borderRadius: BorderRadius.circular(22),
                   child: InkWell(
                     onTap: onBackspace,
                     borderRadius: BorderRadius.circular(22),
                     child: Icon(
                       LucideIcons.delete,
-                      size: 28,
+                      size: 20,
                       color: isDark ? Colors.white : const Color(0xFF444444),
                     ),
                   ),
@@ -98,15 +103,9 @@ class CustomKeypad extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: buildKey('0'),
-                    ),
+                    Expanded(flex: 2, child: buildKey('0')),
                     SizedBox(width: buttonSpacing),
-                    Expanded(
-                      flex: 1,
-                      child: buildBackspaceKey(),
-                    ),
+                    Expanded(flex: 1, child: buildBackspaceKey()),
                   ],
                 ),
               ],
@@ -116,4 +115,4 @@ class CustomKeypad extends StatelessWidget {
       ),
     );
   }
-} 
+}

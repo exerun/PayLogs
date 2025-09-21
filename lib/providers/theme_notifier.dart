@@ -30,8 +30,9 @@ class ThemeNotifier extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final modeStr = prefs.getString('themeMode');
     if (modeStr != null) {
-      if (modeStr.contains('dark')) _themeMode = ThemeMode.dark;
-      else if (modeStr.contains('light')) _themeMode = ThemeMode.light;
+      if (modeStr.contains('dark')) {
+        _themeMode = ThemeMode.dark;
+      } else if (modeStr.contains('light')) _themeMode = ThemeMode.light;
       else _themeMode = ThemeMode.system;
     }
     _isMonochrome = prefs.getBool('isMonochrome') ?? false;

@@ -6,7 +6,6 @@ import '../widgets/expense_item.dart';
 import '../providers/transaction_provider.dart';
 import '../models/transaction.dart';
 import '../data/accounts_data.dart';
-import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,8 +21,18 @@ class _HomePageState extends State<HomePage>
 
   String _formatDate(DateTime dateTime) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
   }
@@ -31,29 +40,114 @@ class _HomePageState extends State<HomePage>
   Color _getTypeColor(TransactionType type) {
     switch (type) {
       case TransactionType.income:
-        return const Color.fromRGBO(179, 255, 179, 1); // green
+        return Colors.green;
       case TransactionType.expense:
-        return const Color.fromRGBO(139, 30, 63, 1); // red
+        return Colors.red;
       case TransactionType.transfer:
-        return const Color.fromRGBO(255, 207, 153, 1); // yellow
+        return const Color(0xFFD2B48C);
     }
   }
 
-  String _getTypeString(TransactionType type) {
-    switch (type) {
-      case TransactionType.income:
-        return 'INCOME';
-      case TransactionType.expense:
-        return 'EXPENSE';
-      case TransactionType.transfer:
-        return 'TRANSFER';
-    }
+  void _showTransactionOptions(BuildContext context, Transaction transaction) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey[900]
+              : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const Icon(LucideIcons.edit),
+              title: const Text('Edit Transaction'),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Implement edit functionality later
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Edit feature coming soon!')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(LucideIcons.trash2, color: Colors.red),
+              title: const Text(
+                'Delete Transaction',
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () async {
+                Navigator.pop(context);
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Delete Transaction'),
+                    content: const Text(
+                      'Are you sure you want to delete this transaction?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await context.read<TransactionProvider>().deleteTransaction(
+                    transaction.id,
+                    context,
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Transaction deleted'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
   }
 
-  void _showEditTransactionDialog(BuildContext context, Transaction transaction) {
-    final notesController = TextEditingController(text: transaction.notes ?? '');
-    final amountController = TextEditingController(text: transaction.amount.toString());
-    bool _isSaving = false;
+  void _showEditTransactionDialog(
+    BuildContext context,
+    Transaction transaction,
+  ) {
+    final notesController = TextEditingController(
+      text: transaction.notes ?? '',
+    );
+    final amountController = TextEditingController(
+      text: transaction.amount.toString(),
+    );
+    bool isSaving = false;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -84,53 +178,71 @@ class _HomePageState extends State<HomePage>
               ),
               actions: [
                 TextButton(
-                  onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+                  onPressed: isSaving
+                      ? null
+                      : () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
-                  onPressed: _isSaving ? null : () async {
-                    setState(() => _isSaving = true);
-                    final amount = double.tryParse(amountController.text) ?? 0.0;
-                    final notes = notesController.text.trim();
-                    if (amount > 0) {
-                      await context.read<TransactionProvider>().updateTransaction(
-                        transaction.copyWith(amount: amount, notes: notes),
-                        context,
-                      );
-                      Navigator.of(context).pop();
-                    }
-                    setState(() => _isSaving = false);
-                  },
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          setState(() => isSaving = true);
+                          final amount =
+                              double.tryParse(amountController.text) ?? 0.0;
+                          final notes = notesController.text.trim();
+                          if (amount > 0) {
+                            await context
+                                .read<TransactionProvider>()
+                                .updateTransaction(
+                                  transaction.copyWith(
+                                    amount: amount,
+                                    notes: notes,
+                                  ),
+                                  context,
+                                );
+                            Navigator.of(context).pop();
+                          }
+                          setState(() => isSaving = false);
+                        },
                   child: const Text('Save'),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   tooltip: 'Delete',
-                  onPressed: _isSaving ? null : () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Delete Transaction'),
-                        content: const Text('Are you sure you want to delete this transaction?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirm == true) {
-                      setState(() => _isSaving = true);
-                      await context.read<TransactionProvider>().deleteTransaction(transaction.id, context);
-                      Navigator.of(context).pop();
-                      setState(() => _isSaving = false);
-                    }
-                  },
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Delete Transaction'),
+                              content: const Text(
+                                'Are you sure you want to delete this transaction?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            setState(() => isSaving = true);
+                            await context
+                                .read<TransactionProvider>()
+                                .deleteTransaction(transaction.id, context);
+                            Navigator.of(context).pop();
+                            setState(() => isSaving = false);
+                          }
+                        },
                 ),
               ],
             );
@@ -143,30 +255,40 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Important!
-    
+
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = isLight
+        ? const Color(0xFFFAF9F5)
+        : Theme.of(context).colorScheme.surface;
     return Scaffold(
       key: const PageStorageKey('home'),
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: bgColor,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.settings, color: Theme.of(context).iconTheme.color),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsPage()),
-            );
-          },
-        ),
         title: Text(
           'PayLogs',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onBackground,
+            fontSize: 18,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: bgColor,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.search,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            onPressed: () {
+              // TODO: Implement search functionality
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Search feature coming soon!')),
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer2<TransactionProvider, AccountsData>(
         builder: (context, transactionProvider, accountsData, child) {
@@ -174,32 +296,22 @@ class _HomePageState extends State<HomePage>
           // Sort transactions by date (most recent first)
           final sortedTransactions = List.from(transactions)
             ..sort((a, b) => b.date.compareTo(a.date));
-          
+
           if (sortedTransactions.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    LucideIcons.receipt,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
+                  Icon(LucideIcons.receipt, size: 48, color: Colors.grey),
                   SizedBox(height: 16),
                   Text(
                     'No transactions yet',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                   SizedBox(height: 8),
                   Text(
                     'Add your first transaction using the + button',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ],
               ),
@@ -222,19 +334,24 @@ class _HomePageState extends State<HomePage>
             itemBuilder: (context, index) {
               String dateKey = groupedTransactions.keys.elementAt(index);
               List<Transaction> dayTransactions = groupedTransactions[dateKey]!;
-              
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Date header
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                     child: Text(
                       dateKey,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                   ),
@@ -242,33 +359,45 @@ class _HomePageState extends State<HomePage>
                   ...dayTransactions.map((transaction) {
                     String accountLabel = '';
                     if (transaction.type == TransactionType.transfer) {
-                      final fromAccList = accountsData.accounts.where((a) => a.id == transaction.fromAccountId);
-                      final toAccList = accountsData.accounts.where((a) => a.id == transaction.toAccountId);
-                      final fromAcc = fromAccList.isNotEmpty ? fromAccList.first : null;
-                      final toAcc = toAccList.isNotEmpty ? toAccList.first : null;
+                      final fromAccList = accountsData.accounts.where(
+                        (a) => a.id == transaction.fromAccountId,
+                      );
+                      final toAccList = accountsData.accounts.where(
+                        (a) => a.id == transaction.toAccountId,
+                      );
+                      final fromAcc = fromAccList.isNotEmpty
+                          ? fromAccList.first
+                          : null;
+                      final toAcc = toAccList.isNotEmpty
+                          ? toAccList.first
+                          : null;
                       if (fromAcc != null && toAcc != null) {
                         accountLabel = '${fromAcc.name} → ${toAcc.name}';
                       } else {
-                        accountLabel = (transaction.fromAccount ?? '') + ' → ' + (transaction.toAccount ?? '');
+                        accountLabel =
+                            '${transaction.fromAccount ?? ''} → ${transaction.toAccount ?? ''}';
                       }
                     } else {
-                      final accList = accountsData.accounts.where((a) => a.id == transaction.accountId);
+                      final accList = accountsData.accounts.where(
+                        (a) => a.id == transaction.accountId,
+                      );
                       final acc = accList.isNotEmpty ? accList.first : null;
-                      accountLabel = acc != null ? acc.name : (transaction.account ?? '');
+                      accountLabel = acc != null
+                          ? acc.name
+                          : (transaction.account ?? '');
                     }
-                    
-                    return GestureDetector(
-                      onTap: () => _showEditTransactionDialog(context, transaction),
-                      child: ExpenseItem(
-                        amount: transaction.amount,
-                        category: transaction.category ?? accountLabel,
-                        categoryIcon: transaction.categoryIcon,
-                        date: '', // Empty date since we're grouping by date
-                        type: _getTypeString(transaction.type),
-                        typeColor: _getTypeColor(transaction.type),
-                      ),
+
+                    return ExpenseItem(
+                      amount: transaction.amount,
+                      category: transaction.category ?? accountLabel,
+                      categoryIcon: transaction.categoryIcon,
+                      date: '', // Empty date since we're grouping by date
+                      type: '',
+                      typeColor: _getTypeColor(transaction.type),
+                      onOptionsPressed: () =>
+                          _showTransactionOptions(context, transaction),
                     );
-                  }).toList(),
+                  }),
                 ],
               );
             },
@@ -276,7 +405,7 @@ class _HomePageState extends State<HomePage>
         },
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80.0), // sits well above nav bar
+        padding: const EdgeInsets.only(bottom: 0.01),
         child: FloatingActionButton.extended(
           onPressed: () async {
             await Navigator.push(
@@ -287,13 +416,21 @@ class _HomePageState extends State<HomePage>
               ),
             );
           },
-          backgroundColor: const Color.fromRGBO(249, 87, 56, 1),
-          icon: const Icon(LucideIcons.plus, color: Colors.white),
-          label: const Text(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          icon: Icon(
+            LucideIcons.plus,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black
+                : Colors.white,
+            size: 18,
+          ),
+          label: Text(
             'Add',
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
             ),
           ),
           shape: RoundedRectangleBorder(
@@ -302,7 +439,7 @@ class _HomePageState extends State<HomePage>
           elevation: 6,
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
-} 
+}

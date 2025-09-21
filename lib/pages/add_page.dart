@@ -17,8 +17,7 @@ class AddPage extends StatefulWidget {
   State<AddPage> createState() => _AddPageState();
 }
 
-class _AddPageState extends State<AddPage>
-    with AutomaticKeepAliveClientMixin {
+class _AddPageState extends State<AddPage> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -26,7 +25,8 @@ class _AddPageState extends State<AddPage>
   String _amountText = '0';
   String? _selectedAccount;
   String? _selectedCategory;
-  String? _selectedCategoryIcon; // Store the icon name for the selected category
+  String?
+  _selectedCategoryIcon; // Store the icon name for the selected category
   String? _selectedFromAccount;
   String? _selectedToAccount;
   final TextEditingController _notesController = TextEditingController();
@@ -38,16 +38,40 @@ class _AddPageState extends State<AddPage>
   // Category options with Lucide icons
   final List<SelectionOption> _defaultCategoryOptions = [
     SelectionOption(value: 'Food', label: 'Food', icon: LucideIcons.utensils),
-    SelectionOption(value: 'Transport', label: 'Transport', icon: LucideIcons.car),
-    SelectionOption(value: 'Electronics', label: 'Electronics', icon: LucideIcons.smartphone),
+    SelectionOption(
+      value: 'Transport',
+      label: 'Transport',
+      icon: LucideIcons.car,
+    ),
+    SelectionOption(
+      value: 'Electronics',
+      label: 'Electronics',
+      icon: LucideIcons.smartphone,
+    ),
     SelectionOption(value: 'Rent', label: 'Rent', icon: LucideIcons.home),
-    SelectionOption(value: 'Shopping', label: 'Shopping', icon: LucideIcons.shoppingBag),
-    SelectionOption(value: 'Entertainment', label: 'Entertainment', icon: LucideIcons.tv),
+    SelectionOption(
+      value: 'Shopping',
+      label: 'Shopping',
+      icon: LucideIcons.shoppingBag,
+    ),
+    SelectionOption(
+      value: 'Entertainment',
+      label: 'Entertainment',
+      icon: LucideIcons.tv,
+    ),
     SelectionOption(value: 'Health', label: 'Health', icon: LucideIcons.heart),
-    SelectionOption(value: 'Education', label: 'Education', icon: LucideIcons.bookOpen),
-    SelectionOption(value: 'Others', label: 'Others', icon: LucideIcons.moreHorizontal),
+    SelectionOption(
+      value: 'Education',
+      label: 'Education',
+      icon: LucideIcons.bookOpen,
+    ),
+    SelectionOption(
+      value: 'Others',
+      label: 'Others',
+      icon: LucideIcons.moreHorizontal,
+    ),
   ];
-  List<SelectionOption> _customCategoryOptions = [];
+  final List<SelectionOption> _customCategoryOptions = [];
 
   void _onDigitPressed(String digit) {
     setState(() {
@@ -102,13 +126,15 @@ class _AddPageState extends State<AddPage>
 
   void _showAccountSelector() {
     final accountsData = context.read<AccountsData>();
-    final accountOptions = accountsData.accountNames.map((account) => 
-      SelectionOption(
-        value: account,
-        label: account,
-        icon: LucideIcons.creditCard,
-      )
-    ).toList();
+    final accountOptions = accountsData.accountNames
+        .map(
+          (account) => SelectionOption(
+            value: account,
+            label: account,
+            icon: LucideIcons.creditCard,
+          ),
+        )
+        .toList();
 
     showModalBottomSheet(
       context: context,
@@ -162,10 +188,17 @@ class _AddPageState extends State<AddPage>
             setState(() {
               _selectedCategory = value;
               // Find the icon for the selected category
-              final allOptions = [..._defaultCategoryOptions, ..._customCategoryOptions];
+              final allOptions = [
+                ..._defaultCategoryOptions,
+                ..._customCategoryOptions,
+              ];
               final selectedOption = allOptions.firstWhere(
                 (option) => option.value == value,
-                orElse: () => SelectionOption(value: value, label: value, icon: LucideIcons.tag),
+                orElse: () => SelectionOption(
+                  value: value,
+                  label: value,
+                  icon: LucideIcons.tag,
+                ),
               );
               _selectedCategoryIcon = _getIconName(selectedOption.icon);
             });
@@ -254,13 +287,15 @@ class _AddPageState extends State<AddPage>
 
   void _showFromAccountSelector() {
     final accountsData = context.read<AccountsData>();
-    final accountOptions = accountsData.accountNames.map((account) => 
-      SelectionOption(
-        value: account,
-        label: account,
-        icon: LucideIcons.creditCard,
-      )
-    ).toList();
+    final accountOptions = accountsData.accountNames
+        .map(
+          (account) => SelectionOption(
+            value: account,
+            label: account,
+            icon: LucideIcons.creditCard,
+          ),
+        )
+        .toList();
 
     showModalBottomSheet(
       context: context,
@@ -281,13 +316,15 @@ class _AddPageState extends State<AddPage>
 
   void _showToAccountSelector() {
     final accountsData = context.read<AccountsData>();
-    final accountOptions = accountsData.accountNames.map((account) => 
-      SelectionOption(
-        value: account,
-        label: account,
-        icon: LucideIcons.creditCard,
-      )
-    ).toList();
+    final accountOptions = accountsData.accountNames
+        .map(
+          (account) => SelectionOption(
+            value: account,
+            label: account,
+            icon: LucideIcons.creditCard,
+          ),
+        )
+        .toList();
 
     showModalBottomSheet(
       context: context,
@@ -309,7 +346,7 @@ class _AddPageState extends State<AddPage>
   Future<void> _saveTransaction() async {
     if (_isSaving) return;
     setState(() => _isSaving = true);
-    
+
     try {
       final amount = double.tryParse(_amountText);
       if (amount == null || amount <= 0) {
@@ -318,12 +355,16 @@ class _AddPageState extends State<AddPage>
       }
 
       // Get transaction type
-      final transactionTypes = [TransactionType.income, TransactionType.expense, TransactionType.transfer];
+      final transactionTypes = [
+        TransactionType.income,
+        TransactionType.expense,
+        TransactionType.transfer,
+      ];
       final type = transactionTypes[_selectedToggleIndex];
 
       // Create transaction based on type
       Transaction transaction;
-      
+
       if (type == TransactionType.transfer) {
         // For transfers, we need fromAccount and toAccount
         if (_selectedFromAccount == null || _selectedToAccount == null) {
@@ -334,7 +375,7 @@ class _AddPageState extends State<AddPage>
           _showSnackBar('Cannot transfer to the same account');
           return;
         }
-        
+
         final accountsData = context.read<AccountsData>();
         final fromAcc = accountsData.accounts.firstWhere(
           (a) => a.name == _selectedFromAccount,
@@ -344,7 +385,7 @@ class _AddPageState extends State<AddPage>
           (a) => a.name == _selectedToAccount,
           orElse: () => throw Exception('To account not found'),
         );
-        
+
         transaction = Transaction(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           type: type,
@@ -371,13 +412,13 @@ class _AddPageState extends State<AddPage>
           _showSnackBar('Please select a category');
           return;
         }
-        
+
         final accountsData = context.read<AccountsData>();
         final acc = accountsData.accounts.firstWhere(
           (a) => a.name == _selectedAccount,
           orElse: () => throw Exception('Account not found'),
         );
-        
+
         transaction = Transaction(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           type: type,
@@ -398,7 +439,10 @@ class _AddPageState extends State<AddPage>
       }
 
       // Add transaction to provider
-      await context.read<TransactionProvider>().addTransaction(transaction, context);
+      await context.read<TransactionProvider>().addTransaction(
+        transaction,
+        context,
+      );
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -440,14 +484,9 @@ class _AddPageState extends State<AddPage>
     }
   }
 
-
-
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 2),
-      ),
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
     );
   }
 
@@ -479,8 +518,18 @@ class _AddPageState extends State<AddPage>
 
   String _formatDate(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -510,21 +559,29 @@ class _AddPageState extends State<AddPage>
         ),
         child: Row(
           children: [
-            Icon(icon, color: theme.colorScheme.onSurface.withOpacity(0.7), size: 18),
+            Icon(
+              icon,
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              size: 18,
+            ),
             SizedBox(width: gap),
             Expanded(
               child: Text(
                 selectedValue ?? label,
                 style: TextStyle(
-                  color: selectedValue != null 
-                      ? theme.colorScheme.onSurface 
+                  color: selectedValue != null
+                      ? theme.colorScheme.onSurface
                       : theme.colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 13,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Icon(LucideIcons.chevronDown, color: theme.colorScheme.onSurface.withOpacity(0.7), size: 18),
+            Icon(
+              LucideIcons.chevronDown,
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              size: 18,
+            ),
           ],
         ),
       ),
@@ -551,63 +608,75 @@ class _AddPageState extends State<AddPage>
                   onPressed: () {
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     LucideIcons.x,
-                    color: Color.fromRGBO(255, 51, 0, 1),
-                    size: 22,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    size: 18,
                   ),
                 ),
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
-                      children: ['INCOME', 'EXPENSE', 'TRANSFER'].asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final label = entry.value;
-                        final isSelected = index == _selectedToggleIndex;
-                        return Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedToggleIndex = index;
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isSelected ? const Color.fromRGBO(255, 51, 0, 1) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                label,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: isSelected 
-                                      ? Colors.white 
-                                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
+                      children: ['INCOME', 'EXPENSE', 'TRANSFER']
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                            final index = entry.key;
+                            final label = entry.value;
+                            final isSelected = index == _selectedToggleIndex;
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedToggleIndex = index;
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    label,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                            );
+                          })
+                          .toList(),
                     ),
                   ),
                 ),
                 IconButton(
-                  onPressed: _isSaving ? null : () async {
-                    await _saveTransaction();
-                  },
-                  icon: const Icon(
+                  onPressed: _isSaving
+                      ? null
+                      : () async {
+                          await _saveTransaction();
+                        },
+                  icon: Icon(
                     LucideIcons.check,
-                    color: Color.fromRGBO(255, 51, 0, 1),
-                    size: 22,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    size: 18,
                   ),
                 ),
               ],
@@ -621,7 +690,7 @@ class _AddPageState extends State<AddPage>
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Theme.of(context).dividerColor),
               ),
@@ -649,9 +718,15 @@ class _AddPageState extends State<AddPage>
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: _buildSelectionField(
-                      label: _selectedToggleIndex == 2 ? 'From Account' : 'Select Account',
-                      selectedValue: _selectedToggleIndex == 2 ? _selectedFromAccount : _selectedAccount,
-                      onTap: _selectedToggleIndex == 2 ? _showFromAccountSelector : _showAccountSelector,
+                      label: _selectedToggleIndex == 2
+                          ? 'From Account'
+                          : 'Account',
+                      selectedValue: _selectedToggleIndex == 2
+                          ? _selectedFromAccount
+                          : _selectedAccount,
+                      onTap: _selectedToggleIndex == 2
+                          ? _showFromAccountSelector
+                          : _showAccountSelector,
                       icon: LucideIcons.creditCard,
                     ),
                   ),
@@ -661,10 +736,18 @@ class _AddPageState extends State<AddPage>
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: _buildSelectionField(
-                      label: _selectedToggleIndex == 2 ? 'To Account' : 'Select Category',
-                      selectedValue: _selectedToggleIndex == 2 ? _selectedToAccount : _selectedCategory,
-                      onTap: _selectedToggleIndex == 2 ? _showToAccountSelector : _showCategorySelector,
-                      icon: _selectedToggleIndex == 2 ? LucideIcons.creditCard : LucideIcons.tag,
+                      label: _selectedToggleIndex == 2
+                          ? 'To Account'
+                          : 'Category',
+                      selectedValue: _selectedToggleIndex == 2
+                          ? _selectedToAccount
+                          : _selectedCategory,
+                      onTap: _selectedToggleIndex == 2
+                          ? _showToAccountSelector
+                          : _showCategorySelector,
+                      icon: _selectedToggleIndex == 2
+                          ? LucideIcons.creditCard
+                          : LucideIcons.tag,
                     ),
                   ),
                 ),
@@ -683,9 +766,14 @@ class _AddPageState extends State<AddPage>
                     child: GestureDetector(
                       onTap: _selectDate,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 14,
+                        ),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Theme.of(context).dividerColor),
+                          border: Border.all(
+                            color: Theme.of(context).dividerColor,
+                          ),
                           borderRadius: BorderRadius.circular(10),
                           color: Theme.of(context).colorScheme.surface,
                         ),
@@ -697,15 +785,19 @@ class _AddPageState extends State<AddPage>
                                 _formatDate(_selectedDate),
                                 style: TextStyle(
                                   fontSize: 15,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             Icon(
-                              LucideIcons.calendar, 
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), 
-                              size: 20
+                              LucideIcons.calendar,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.7),
+                              size: 20,
                             ),
                           ],
                         ),
@@ -720,9 +812,14 @@ class _AddPageState extends State<AddPage>
                     child: GestureDetector(
                       onTap: _selectTime,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 14,
+                        ),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Theme.of(context).dividerColor),
+                          border: Border.all(
+                            color: Theme.of(context).dividerColor,
+                          ),
                           borderRadius: BorderRadius.circular(10),
                           color: Theme.of(context).colorScheme.surface,
                         ),
@@ -734,15 +831,19 @@ class _AddPageState extends State<AddPage>
                                 _formatTime(_selectedTime),
                                 style: TextStyle(
                                   fontSize: 15,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             Icon(
-                              LucideIcons.clock, 
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), 
-                              size: 20
+                              LucideIcons.clock,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.7),
+                              size: 20,
                             ),
                           ],
                         ),
@@ -767,25 +868,25 @@ class _AddPageState extends State<AddPage>
                   fontSize: 14,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
-                autofocus: true,
                 decoration: InputDecoration(
                   hintText: 'Add notes...',
                   hintStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.5),
                   ),
                   prefixIcon: Icon(
-                    LucideIcons.fileText, 
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    LucideIcons.fileText,
+                    size: 16,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.7),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   contentPadding: const EdgeInsets.all(16),
                 ),
-                onTap: () {
-                  _notesFocusNode.requestFocus();
-                },
               ),
             ),
           ),
@@ -804,25 +905,16 @@ class _AddPageState extends State<AddPage>
 
     return Scaffold(
       key: const PageStorageKey('add'),
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       resizeToAvoidBottomInset: true,
       body: WillPopScope(
         onWillPop: () async {
           Navigator.of(context).popUntil((route) => route.isFirst);
           return false;
         },
-        child: SafeArea(
-          child: MediaQuery.removeViewInsets(
-            context: context,
-            removeBottom: false,
-            child: isKeyboardOpen
-                ? SingleChildScrollView(child: mainContent)
-                : mainContent,
-          ),
-        ),
+        child: SafeArea(child: mainContent),
       ),
-      // FAB removed
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -832,4 +924,4 @@ class _AddPageState extends State<AddPage>
     _notesFocusNode.dispose();
     super.dispose();
   }
-} 
+}

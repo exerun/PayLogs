@@ -55,11 +55,14 @@ class _AccountsPageState extends State<AccountsPage>
               onPressed: () async {
                 final name = nameController.text.trim();
                 final balance = double.tryParse(balanceController.text) ?? 0.0;
-                
+
                 if (name.isNotEmpty) {
                   try {
                     print('Attempting to add account from UI: $name');
-                    await context.read<AccountsData>().addAccount(name, balance);
+                    await context.read<AccountsData>().addAccount(
+                      name,
+                      balance,
+                    );
                     print('Account added successfully from UI');
                     Navigator.of(context).pop();
                   } catch (e) {
@@ -84,8 +87,10 @@ class _AccountsPageState extends State<AccountsPage>
 
   void _showEditAccountDialog(BuildContext context, Account account) {
     final nameController = TextEditingController(text: account.name);
-    final balanceController = TextEditingController(text: account.balance.toString());
-    bool _isSaving = false;
+    final balanceController = TextEditingController(
+      text: account.balance.toString(),
+    );
+    bool isSaving = false;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -117,52 +122,69 @@ class _AccountsPageState extends State<AccountsPage>
               ),
               actions: [
                 TextButton(
-                  onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+                  onPressed: isSaving
+                      ? null
+                      : () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
-                  onPressed: _isSaving ? null : () async {
-                    setState(() => _isSaving = true);
-                    final name = nameController.text.trim();
-                    final balance = double.tryParse(balanceController.text) ?? 0.0;
-                    if (name.isNotEmpty) {
-                      await context.read<AccountsData>().updateAccount(
-                        Account(id: account.id, name: name, balance: balance),
-                      );
-                      Navigator.of(context).pop();
-                    }
-                    setState(() => _isSaving = false);
-                  },
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          setState(() => isSaving = true);
+                          final name = nameController.text.trim();
+                          final balance =
+                              double.tryParse(balanceController.text) ?? 0.0;
+                          if (name.isNotEmpty) {
+                            await context.read<AccountsData>().updateAccount(
+                              Account(
+                                id: account.id,
+                                name: name,
+                                balance: balance,
+                              ),
+                            );
+                            Navigator.of(context).pop();
+                          }
+                          setState(() => isSaving = false);
+                        },
                   child: const Text('Save'),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   tooltip: 'Delete',
-                  onPressed: _isSaving ? null : () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Delete Account'),
-                        content: const Text('Are you sure you want to delete this account?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirm == true) {
-                      setState(() => _isSaving = true);
-                      await context.read<AccountsData>().deleteAccount(account.id!);
-                      Navigator.of(context).pop();
-                      setState(() => _isSaving = false);
-                    }
-                  },
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Delete Account'),
+                              content: const Text(
+                                'Are you sure you want to delete this account?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            setState(() => isSaving = true);
+                            await context.read<AccountsData>().deleteAccount(
+                              account.id!,
+                            );
+                            Navigator.of(context).pop();
+                            setState(() => isSaving = false);
+                          }
+                        },
                 ),
               ],
             );
@@ -177,18 +199,33 @@ class _AccountsPageState extends State<AccountsPage>
     super.build(context); // Important!
     return Scaffold(
       key: const PageStorageKey('accounts'),
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: Text(
-          'Accounts',
+          'PayLogs',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onBackground,
+            fontSize: 18,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.search,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            onPressed: () {
+              // TODO: Implement search functionality
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Search feature coming soon!')),
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer<AccountsData>(
         builder: (context, accountsData, child) {
@@ -205,16 +242,16 @@ class _AccountsPageState extends State<AccountsPage>
                   child: Row(
                     children: [
                       Container(
-                        width: 50,
-                        height: 50,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(25),
+                          color: const Color(0xFFD2B48C).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: Icon(
                           LucideIcons.building2,
                           color: Theme.of(context).iconTheme.color,
-                          size: 24,
+                          size: 18,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -245,7 +282,11 @@ class _AccountsPageState extends State<AccountsPage>
                         onPressed: () {
                           _showEditAccountDialog(context, account);
                         },
-                        icon: Icon(LucideIcons.edit, color: Theme.of(context).iconTheme.color),
+                        icon: Icon(
+                          LucideIcons.edit,
+                          color: Theme.of(context).iconTheme.color,
+                          size: 18,
+                        ),
                       ),
                     ],
                   ),
@@ -256,16 +297,24 @@ class _AccountsPageState extends State<AccountsPage>
         },
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80.0),
+        padding: const EdgeInsets.only(bottom: 90.0),
         child: FloatingActionButton.extended(
           onPressed: () => _showAddAccountDialog(context),
-          backgroundColor: const Color.fromRGBO(249, 87, 56, 1),
-          icon: const Icon(LucideIcons.plus, color: Colors.white),
-          label: const Text(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          icon: Icon(
+            LucideIcons.plus,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black
+                : Colors.white,
+            size: 18,
+          ),
+          label: Text(
             'Add',
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
             ),
           ),
           shape: RoundedRectangleBorder(
@@ -274,7 +323,7 @@ class _AccountsPageState extends State<AccountsPage>
           elevation: 6,
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
-} 
+}

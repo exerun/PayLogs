@@ -7,7 +7,7 @@ import 'providers/transaction_provider.dart';
 import 'providers/budget_provider.dart';
 import 'providers/theme_notifier.dart';
 import 'providers/currency_provider.dart';
-
+import 'package:paylogs/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'widgets/screenshot_import_sheet.dart';
 import 'widgets/responsive_layout.dart';
@@ -18,11 +18,12 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize SQLite for desktop platforms
-  if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.linux || 
-                  defaultTargetPlatform == TargetPlatform.windows || 
-                  defaultTargetPlatform == TargetPlatform.macOS)) {
+  if (!kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.linux ||
+          defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.macOS)) {
     try {
       // Initialize FFI
       sqfliteFfiInit();
@@ -35,7 +36,7 @@ void main() async {
       print('Falling back to regular sqflite');
     }
   }
-  
+
   runApp(const PayLogsApp());
 }
 
@@ -57,31 +58,10 @@ class PayLogsApp extends StatelessWidget {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'PayLogs',
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromRGBO(249, 87, 56, 1), brightness: Brightness.light).copyWith(
-                background: const Color(0xFFF3E9DC),
-              ),
-              useMaterial3: true,
-              textTheme: GoogleFonts.jetBrainsMonoTextTheme(),
-              scaffoldBackgroundColor: const Color(0xFFF3E9DC),
-              canvasColor: const Color(0xFFF3E9DC),
-            ),
-            darkTheme: ThemeData(
-              colorScheme: _customDarkScheme(),
-              useMaterial3: true,
-              textTheme: GoogleFonts.jetBrainsMonoTextTheme(
-                ThemeData(brightness: Brightness.dark).textTheme.apply(
-                  bodyColor: Colors.white,
-                  displayColor: Colors.white,
-                ),
-              ),
-              scaffoldBackgroundColor: const Color.fromRGBO(30, 31, 30, 1),
-              canvasColor: const Color.fromRGBO(30, 31, 30, 1),
-            ),
+            theme: AppTheme.lightTheme,       // Use the new light theme
+            darkTheme: AppTheme.darkTheme,     // Use the new dark theme
             themeMode: themeNotifier.themeMode,
-            home: const ResponsiveLayout(
-              child: _ShareIntentHandler(),
-            ),
+            home: const ResponsiveLayout(child: _ShareIntentHandler()),
           );
         },
       ),
@@ -89,24 +69,22 @@ class PayLogsApp extends StatelessWidget {
   }
 }
 
-ColorScheme _customDarkScheme() {
-  return ColorScheme.fromSeed(
-    seedColor: const Color.fromRGBO(249, 87, 56, 1),
-    brightness: Brightness.dark,
-  ).copyWith(
-    background: const Color.fromRGBO(30, 31, 30, 1),
-    surface: Colors.grey[900],
-    primary: const Color.fromRGBO(249, 87, 56, 1),
-    secondary: const Color.fromRGBO(249, 87, 56, 1),
-    onBackground: Colors.white,
-    onSurface: Colors.white,
-    onPrimary: Colors.white,
-    onSecondary: Colors.white,
-  );
-}
+// ColorScheme _customDarkScheme() {
+//   return ColorScheme.fromSeed(
+//     seedColor: const Color(0xFFD2B48C),
+//     brightness: Brightness.dark,
+//   ).copyWith(
+//     surface: Colors.grey[900],
+//     primary: const Color(0xFFD2B48C),
+//     secondary: const Color(0xFFD2B48C),
+//     onSurface: Colors.white,
+//     onPrimary: Colors.white,
+//     onSecondary: Colors.white,
+//   );
+// }
 
 class _ShareIntentHandler extends StatefulWidget {
-  const _ShareIntentHandler({super.key});
+  const _ShareIntentHandler();
 
   @override
   State<_ShareIntentHandler> createState() => _ShareIntentHandlerState();

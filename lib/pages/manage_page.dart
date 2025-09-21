@@ -21,27 +21,53 @@ class _ManagePageState extends State<ManagePage>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Manage'),
+        title: const Text(
+          'PayLogs',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.search,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            onPressed: () {
+              // TODO: Implement search functionality
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Search feature coming soon!')),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: ToggleButtons(
-              isSelected: List.generate(_tabs.length, (i) => i == _selectedIndex),
+              isSelected: List.generate(
+                _tabs.length,
+                (i) => i == _selectedIndex,
+              ),
               onPressed: (index) {
                 setState(() => _selectedIndex = index);
               },
               borderRadius: BorderRadius.circular(8),
               selectedColor: Colors.white,
-              fillColor: Colors.indigo,
-              color: Colors.indigo,
-              textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+              fillColor: const Color(0xFFF0714A),
+              color: const Color(0xFFF0714A),
+              textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
               constraints: const BoxConstraints(minHeight: 40, minWidth: 120),
               children: _tabs.map((tab) => Text(tab)).toList(),
             ),
@@ -50,14 +76,11 @@ class _ManagePageState extends State<ManagePage>
           Expanded(
             child: IndexedStack(
               index: _selectedIndex,
-              children: const [
-                AnalysisSection(),
-                BudgetSection(),
-              ],
+              children: const [AnalysisSection(), BudgetSection()],
             ),
           ),
         ],
       ),
     );
   }
-} 
+}

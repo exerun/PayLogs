@@ -12,85 +12,75 @@ class BudgetSection extends StatefulWidget {
 
 class _BudgetSectionState extends State<BudgetSection> {
   final TextEditingController _newCategoryController = TextEditingController();
-  final Map<String, TextEditingController> _controllers = {};
+  final TextEditingController _newBudgetController = TextEditingController();
 
   @override
   void dispose() {
     _newCategoryController.dispose();
-    for (final controller in _controllers.values) {
-      controller.dispose();
-    }
+    _newBudgetController.dispose();
     super.dispose();
   }
 
   void _showEditBudgetDialog(BuildContext context, String category, double amount) {
-    final controller = TextEditingController(text: amount == 0.0 ? '' : amount.toStringAsFixed(0));
-    bool _isSaving = false;
+    final controller = TextEditingController(text: amount.toStringAsFixed(0));
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Edit Budget for $category'),
-              content: TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Monthly Budget',
-                  prefixText: '₹',
-                  border: OutlineInputBorder(),
+      builder: (context) => AlertDialog(
+        title: Text('Edit Budget for $category'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Monthly Budget',
+            prefixText: '₹',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newValue = double.tryParse(controller.text) ?? 0.0;
+              if (newValue > 0) {
+                await context.read<BudgetProvider>().updateBudget(category, newValue);
+              }
+              Navigator.of(context).pop();
+            },
+            child: const Text('Save'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Delete Category'),
+                  content: const Text('Delete this budget category?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
                 ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: _isSaving ? null : () async {
-                    setState(() => _isSaving = true);
-                    final newValue = double.tryParse(controller.text) ?? 0.0;
-                    await context.read<BudgetProvider>().updateBudget(category, newValue);
-                    Navigator.of(context).pop();
-                    setState(() => _isSaving = false);
-                  },
-                  child: const Text('Save'),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  tooltip: 'Delete',
-                  onPressed: _isSaving ? null : () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Delete Category'),
-                        content: const Text('Are you sure you want to delete this category?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirm == true) {
-                      setState(() => _isSaving = true);
-                      await context.read<BudgetProvider>().removeCategory(category);
-                      Navigator.of(context).pop();
-                      setState(() => _isSaving = false);
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
+              );
+              if (confirm == true) {
+                await context.read<BudgetProvider>().removeCategory(category);
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -99,75 +89,124 @@ class _BudgetSectionState extends State<BudgetSection> {
     return Consumer<BudgetProvider>(
       builder: (context, budgetProvider, child) {
         final budgets = budgetProvider.budgets;
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _newCategoryController,
-                      decoration: const InputDecoration(
-                        labelText: 'Add Category',
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              // Add budget section
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Add Budget Category',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                    ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextField(
+                              controller: _newCategoryController,
+                              decoration: const InputDecoration(
+                                labelText: 'Category Name',
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: _newBudgetController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Budget',
+                                border: OutlineInputBorder(),
+                                prefixText: '₹',
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              final newCategory = _newCategoryController.text.trim();
+                              final budget = double.tryParse(_newBudgetController.text) ?? 0.0;
+                              if (newCategory.isNotEmpty && budget > 0) {
+                                budgetProvider.setBudget(newCategory, budget);
+                                _newCategoryController.clear();
+                                _newBudgetController.clear();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFD2B48C),
+                            ),
+                            child: Icon(
+                              LucideIcons.plus,
+                              size: 16,
+                              color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      final newCategory = _newCategoryController.text.trim();
-                      if (newCategory.isNotEmpty) {
-                        budgetProvider.addCategory(newCategory);
-                        _newCategoryController.clear();
-                        // Create a controller for the new category
-                        _controllers[newCategory] = TextEditingController();
-                      }
-                    },
-                    child: const Icon(LucideIcons.plus),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 24),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: budgets.length,
-                itemBuilder: (context, index) {
-                  final category = budgets.keys.elementAt(index);
-                  final amount = budgets[category]!;
-                  final controller = _controllers.putIfAbsent(
-                    category,
-                    () => TextEditingController(text: amount == 0.0 ? '' : amount.toStringAsFixed(0)),
-                  );
-                  // Keep controller in sync with provider if changed elsewhere
-                  if (controller.text != (amount == 0.0 ? '' : amount.toStringAsFixed(0))) {
-                    controller.text = amount == 0.0 ? '' : amount.toStringAsFixed(0);
-                    controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
-                  }
-                  return Card(
+              const SizedBox(height: 16),
+
+              // Budget categories
+              if (budgets.isNotEmpty) ...[
+                const Text(
+                  'Budget Categories',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                for (final entry in budgets.entries)
+                  Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ListTile(
                       title: Text(
-                        category,
+                        entry.key,
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
-                      subtitle: Text('Budget: ₹${amount.toStringAsFixed(0)}'),
+                      subtitle: Text('Budget: ₹${entry.value.toStringAsFixed(0)}'),
                       trailing: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _showEditBudgetDialog(context, category, amount),
+                        icon: const Icon(LucideIcons.edit, size: 16),
+                        onPressed: () => _showEditBudgetDialog(context, entry.key, entry.value),
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+              ] else ...[
+                const Center(
+                  child: Column(
+                    children: [
+                      Icon(LucideIcons.target, size: 48, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text(
+                        'No budgets set yet',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Add a budget category above to get started',
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         );
       },
     );
   }
-} 
+}
